@@ -83,11 +83,11 @@ ln -sfn ~/gitlocal/skills/survey ~/.agents/skills/survey
 CLIs complement the MCP servers (steps 5–10): help output is read on demand — progressive disclosure, zero context overhead. Install priority: homebrew → conda-forge → PyPI/npm.
 
 ```bash
-brew install gh node ripgrep fd jq fzf tree ast-grep
+brew install gh node ripgrep fd jq fzf tree ast-grep coreutils
 conda install -c conda-forge wandb huggingface_hub            # fallback: pip install wandb huggingface_hub
 ```
 
-> Toolbox: `rg` fast search · `fd` find · `jq` JSON · `fzf` fuzzy filter · `tree` directory overview · `ast-grep` structural search/replace.
+> Toolbox: `rg` fast search · `fd` find · `jq` JSON · `fzf` fuzzy filter · `tree` directory overview · `ast-grep` structural search/replace · `timeout` (coreutils) for dispatch lanes (step 12).
 
 Login each CLI (env vars are the non-interactive equivalent — enough to put the exports in `~/.zshrc`):
 
