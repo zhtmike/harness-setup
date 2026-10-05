@@ -309,6 +309,8 @@ mkdir -p ~/gitlocal ~/.config/opencode/skills
 git clone https://github.com/zhtmike/skills ~/gitlocal/skills
 ln -sfn ~/gitlocal/skills/code-review ~/.config/opencode/skills/code-review
 ln -sfn ~/gitlocal/skills/coding-style ~/.config/opencode/skills/coding-style
+ln -sfn ~/gitlocal/skills/commit-gate ~/.config/opencode/skills/commit-gate
+ln -sfn ~/gitlocal/skills/survey ~/.config/opencode/skills/survey
 ```
 
 > Symlinks keep a single source of truth: `git pull` in `~/gitlocal/skills` updates both skills everywhere. https://github.com/zhtmike/skills

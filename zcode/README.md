@@ -227,6 +227,8 @@ mkdir -p ~/gitlocal ~/.zcode/skills
 git clone https://github.com/zhtmike/skills ~/gitlocal/skills
 ln -sfn ~/gitlocal/skills/code-review ~/.zcode/skills/code-review
 ln -sfn ~/gitlocal/skills/coding-style ~/.zcode/skills/coding-style
+ln -sfn ~/gitlocal/skills/commit-gate ~/.zcode/skills/commit-gate
+ln -sfn ~/gitlocal/skills/survey ~/.zcode/skills/survey
 ```
 
 > Symlinks keep a single source of truth: `git pull` in `~/gitlocal/skills` updates both skills everywhere. https://github.com/zhtmike/skills
@@ -289,7 +291,7 @@ Enable **auto-update** in Settings so stable releases download and install autom
 Restart ZCode, then check MCPs, skills, and tool routing:
 
 1. **Settings → MCP** — all five servers (`gh`, `wandb`, `context7`, `gh_grep`, `hf`) should be listed: four connected, `wandb` disabled by default (step 4). If a server shows no tools, re-check the entry's field names and values.
-2. Type `/` in the input box — your skills (`grill-me`, `grilling`, `code-review`, `coding-style`) should be listed.
+2. Type `/` in the input box — your skills (`grill-me`, `grilling`, `code-review`, `coding-style`, `commit-gate`, `survey`) should be listed.
 3. Ask the agent to look up a library's current API — it should route to `context7` first (per step 9 guidance).
 
 ## 16. Local state and scope
