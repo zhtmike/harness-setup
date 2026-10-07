@@ -302,7 +302,7 @@ Codemode activates automatically whenever a server uses the default `codemode` e
 
 MCP servers (config: `~/.pi/agent/mcp.json`) expose tools via `codemode`; promote a hot tool to direct calls with `toolExposure` in that config. CLI tools complement them — help output loads on demand.
 
-- **gh:** auth and `gh skill` — GitHub reads go through the `gh` MCP, code examples through `gh_grep`.
+- **gh:** auth and `gh skill` — GitHub reads go through the `gh` MCP, code examples through `gh_grep`. In codemode its results are `{content:[{type,text}]}` envelopes with JSON-string text — join the parts and `JSON.parse`; `get_review_comments` returns `{review_threads:[...]}`, not a flat array.
 - **wandb:** login/sync/artifacts/sweeps — run queries go through the `wandb` MCP.
 - **hf:** auth and `hf skills` — Hub lookups go through the `hf` MCP.
 - **Toolbox on PATH:** `rg`, `fd`, `jq`, `fzf`, `tree`, `ast-grep` (structural search/replace).
