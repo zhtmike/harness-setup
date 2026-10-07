@@ -384,7 +384,7 @@ Inside pi:
 5. Smoke test: `/skill:survey <small topic>` → investigation lanes dispatched per the Dispatch section, one synthesized answer; "review this diff" → a single dispatched reviewer.
 6. "grill me on plan X" → grilling skill triggers.
 
-> Daily: `Ctrl+L` model picker (`Ctrl+P` cycles), `Shift+Tab` thinking, `pi -c` continue, `pi -r` resume, `pi --print "task"` one-shot, `pi --tools read,grep,find,ls` read-only (MCP-free), `!cmd` shell, `/tree` edit earlier message, `/reload` after config changes.
+> Daily: `Ctrl+L` model picker (`Ctrl+P` cycles), `Shift+Tab` thinking, `pi -c` continue, `pi -r` resume, `pi --print "task"` one-shot, `pi --no-mcp --tools read,grep,find,ls` read-only (MCP-free), `!cmd` shell, `/tree` edit earlier message, `/reload` after config changes.
 > TUI: fullscreen is the default (`"tuiMode": "regular"` reverts); `"theme"` in settings.json (default `system`; custom themes in `~/.pi/agent/themes/`); keybindings in `~/.pi/agent/keybindings.json` (`/hotkeys` lists current).
 > Cost: `CH` in the footer + `/session` (cache hit-rate, re-billed dollars); model/thinking switches re-bill the prefix — avoid them mid-session. Long sessions auto-compact when context nears the window limit (16384 tokens reserved; the last 20000 stay un-summarized); `/compact` forces it.
 > pi is YOLO by design — no permission prompts; trust + git are the safety net. A project with pi resources under `.pi/` asks to trust it once on first launch (`/trust`; pre-decide with `defaultProjectTrust` in settings.json).
