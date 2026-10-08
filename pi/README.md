@@ -74,6 +74,7 @@ ln -sfn ~/gitlocal/skills/code-review ~/.agents/skills/code-review
 ln -sfn ~/gitlocal/skills/coding-style ~/.agents/skills/coding-style
 ln -sfn ~/gitlocal/skills/commit-gate ~/.agents/skills/commit-gate
 ln -sfn ~/gitlocal/skills/survey ~/.agents/skills/survey
+ln -sfn ~/gitlocal/skills/self-learn ~/.agents/skills/self-learn
 ```
 
 > `~/.agents/skills/` is the cross-agent skills standard dir — pi reads it natively. Symlinks keep `git pull` in `~/gitlocal/skills` as the single source of truth; skip the clone if the directory already exists. `/reload` after any change.
@@ -381,7 +382,7 @@ Inside pi:
 1. `/model` → zai/glm-5.3; `Shift+Tab` → max; `Ctrl+S` to save.
 2. `/mcp` → all six servers connected (or `pi mcp list` from the shell).
 3. "Run `gh auth status`" → authenticated. Same for `hf auth whoami` and `wandb status`.
-4. "List your skills" → grilling, code-review, coding-style, commit-gate, survey (grill-me is installed but hidden by design — `disable-model-invocation`).
+4. "List your skills" → grilling, code-review, coding-style, commit-gate, survey, self-learn (grill-me is installed but hidden by design — `disable-model-invocation`).
 5. Smoke test: `/skill:survey <small topic>` → investigation lanes dispatched per the Dispatch section, one synthesized answer; "review this diff" → a single dispatched reviewer.
 6. "grill me on plan X" → grilling skill triggers.
 
