@@ -22,7 +22,7 @@ opencode --version
 
 > https://github.com/anomalyco/opencode · https://opencode.ai/v2/docs
 
-## 2. Install pyright LSP
+## 2. Install pyright typechecker
 
 **macOS:**
 
@@ -36,7 +36,7 @@ brew install pyright
 npm install -g pyright
 ```
 
-> LSPs and formatters are opt-in — set `"lsp": true` in `opencode.json(c)`. Custom `lsp` entries must declare `extensions`.
+> v2 accepts and preserves `lsp` config but has no LSP runtime yet — no built-in servers start, no diagnostics, no LSP tool; record lint/typecheck commands in AGENTS.md instead. `extensions` is optional in custom entries. pyright still serves as the CLI typechecker.
 
 ## 3. Configure providers
 
@@ -62,7 +62,7 @@ This generates `opencode.json` (or `opencode.jsonc` if one already exists), `tui
 
 oh-my-opencode-slim auto-provides **context7** and **gh_grep** — add them to `opencode.jsonc` only for API-key auth (context7) or visibility (gh_grep). **Websearch** is an OpenCode built-in tool (step 8); **gh**, **wandb**, and **hf** always need explicit config.
 
-All MCP servers live under `"mcp"."servers"` in `~/.config/opencode/opencode.json` (or `opencode.jsonc` — either works; the steps below say `opencode.jsonc` for brevity). Each step shows just the inner server entry; a complete merged example is shown at the end of step 10.
+All MCP servers live under `"mcp"."servers"` in `~/.config/opencode/opencode.json` (or `opencode.jsonc` — either works; the steps below say `opencode.jsonc` for brevity). Each step shows just the inner server entry; a complete merged example is shown at the end of step 10. v2 routes MCP tools through Code Mode by default — the entries here set `"codemode": false` to register tools directly, which the step-11 guidance and the agent `mcps` grants are written against.
 
 ## 5. Add GitHub MCP
 
@@ -85,6 +85,7 @@ Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
   "type": "remote",
   "url": "https://api.githubcopilot.com/mcp/",
   "oauth": false,
+  "codemode": false,
   "headers": {
     "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}",
     "X-MCP-Toolsets": "context,issues,pull_requests,repos,actions",
@@ -112,6 +113,7 @@ Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
   "type": "remote",
   "url": "https://mcp.withwandb.com/mcp",
   "oauth": false,
+  "codemode": false,
   "headers": {
     "Authorization": "Bearer {env:WANDB_API_KEY}",
     "Accept": "application/json, text/event-stream"
@@ -136,6 +138,7 @@ Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
   "type": "remote",
   "url": "https://mcp.context7.com/mcp",
   "oauth": false,
+  "codemode": false,
   "headers": {
     "Authorization": "Bearer {env:CONTEXT7_API_KEY}",
     "Accept": "application/json, text/event-stream"
@@ -147,13 +150,13 @@ Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
 
 ## 8. Websearch (built-in, no MCP)
 
-Websearch is an OpenCode built-in tool (Exa-backed), enabled by default — no MCP entry. For authenticated search instead of the anonymous tier, export the Exa key in your shell rc file (`~/.zshrc` on macOS, `~/.bashrc` on Linux):
+Websearch is an OpenCode built-in tool, enabled by default — no MCP entry. Providers: Exa, Firecrawl, Parallel, Tavily, TinyFish — to use Exa, export its key in your shell rc file (`~/.zshrc` on macOS, `~/.bashrc` on Linux):
 
 ```bash
 export EXA_API_KEY="your-exa-key"
 ```
 
-Restrict it per agent with `permission`.
+The first search asks for permission and a provider choice. Restrict it per agent with the `websearch` permission action.
 
 ## 9. Add GitHub Code Search MCP
 
@@ -165,7 +168,8 @@ Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
 "gh_grep": {
   "type": "remote",
   "url": "https://mcp.grep.app",
-  "oauth": false
+  "oauth": false,
+  "codemode": false
 }
 ```
 
@@ -186,6 +190,7 @@ Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
   "type": "remote",
   "url": "https://huggingface.co/mcp",
   "oauth": false,
+  "codemode": false,
   "headers": {
     "Authorization": "Bearer {env:HF_TOKEN}"
   }
@@ -205,6 +210,7 @@ After all MCP entries are added, the `"mcp"` block should look like:
       "type": "remote",
       "url": "https://api.githubcopilot.com/mcp/",
       "oauth": false,
+      "codemode": false,
       "headers": {
         "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}",
         "X-MCP-Toolsets": "context,issues,pull_requests,repos,actions",
@@ -215,6 +221,7 @@ After all MCP entries are added, the `"mcp"` block should look like:
       "type": "remote",
       "url": "https://mcp.withwandb.com/mcp",
       "oauth": false,
+      "codemode": false,
       "headers": {
         "Authorization": "Bearer {env:WANDB_API_KEY}",
         "Accept": "application/json, text/event-stream"
@@ -224,6 +231,7 @@ After all MCP entries are added, the `"mcp"` block should look like:
       "type": "remote",
       "url": "https://mcp.context7.com/mcp",
       "oauth": false,
+      "codemode": false,
       "headers": {
         "Authorization": "Bearer {env:CONTEXT7_API_KEY}",
         "Accept": "application/json, text/event-stream"
@@ -232,12 +240,14 @@ After all MCP entries are added, the `"mcp"` block should look like:
     "gh_grep": {
       "type": "remote",
       "url": "https://mcp.grep.app",
-      "oauth": false
+      "oauth": false,
+      "codemode": false
     },
     "hf": {
       "type": "remote",
       "url": "https://huggingface.co/mcp",
       "oauth": false,
+      "codemode": false,
       "headers": {
         "Authorization": "Bearer {env:HF_TOKEN}"
       }
@@ -281,7 +291,7 @@ Which MCP tools each agent role has (configured in oh-my-opencode-slim.json):
 | explorer | ✅ | ✅ | — | — | — |
 | designer | — | — | — | — | — |
 | fixer | — | — | — | — | — |
-| observer | — | — | — | — | — |
+| councillor | — | — | — | — | — |
 
 ✅ = available &nbsp; — = not available
 
@@ -324,7 +334,7 @@ Replace `~/.config/opencode/oh-my-opencode-slim.json`:
 {
   "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
   "preset": "glm",
-  "disabled_agents": [],
+  "disabled_agents": ["observer"],
   "presets": {
     "deepseek": {
       "orchestrator": { "model": "deepseek/deepseek-v4-pro", "variant": "max", "skills": ["*"], "mcps": ["*", "!context7"] },
@@ -332,8 +342,7 @@ Replace `~/.config/opencode/oh-my-opencode-slim.json`:
       "librarian":    { "model": "deepseek/deepseek-flash", "variant": "max", "skills": [], "mcps": ["context7", "gh_grep", "gh", "hf", "wandb"] },
       "explorer":     { "model": "deepseek/deepseek-flash", "variant": "max", "skills": [], "mcps": ["gh", "wandb"] },
       "designer":     { "model": "deepseek/deepseek-flash", "variant": "max", "skills": ["coding-style"], "mcps": [] },
-      "fixer":        { "model": "deepseek/deepseek-flash", "variant": "max", "skills": ["coding-style"], "mcps": [] },
-      "observer":     { "model": "deepseek/deepseek-flash", "variant": "max", "skills": [], "mcps": [] }
+      "fixer":        { "model": "deepseek/deepseek-flash", "variant": "max", "skills": ["coding-style"], "mcps": [] }
     },
     "glm": {
       "orchestrator": { "model": "zai-coding-plan/glm-5.3", "variant": "max", "skills": ["*"], "mcps": ["*", "!context7"] },
@@ -341,8 +350,7 @@ Replace `~/.config/opencode/oh-my-opencode-slim.json`:
       "librarian":    { "model": "zai-coding-plan/glm-5.3-flash", "variant": "max", "skills": [], "mcps": ["context7", "gh_grep", "gh", "hf", "wandb"] },
       "explorer":     { "model": "zai-coding-plan/glm-5.3-flash", "variant": "max", "skills": [], "mcps": ["gh", "wandb"] },
       "designer":     { "model": "zai-coding-plan/glm-5.3-flash", "variant": "max", "skills": ["coding-style"], "mcps": [] },
-      "fixer":        { "model": "zai-coding-plan/glm-5.3-flash", "variant": "max", "skills": ["coding-style"], "mcps": [] },
-      "observer":     { "model": "zai-coding-plan/glm-5.3-flash", "variant": "max", "skills": [], "mcps": [] }
+      "fixer":        { "model": "zai-coding-plan/glm-5.3-flash", "variant": "max", "skills": ["coding-style"], "mcps": [] }
     }
   }
 }
