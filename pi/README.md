@@ -56,7 +56,7 @@ mkdir -p ~/.pi/agent
 }
 ```
 
-> Default glm-5.3, thinking max at startup (`defaultThinkingLevel`); `Shift+Tab` cycles mid-session. `Ctrl+P` cycles `enabledModels`; `Ctrl+L`/`/model` picker; `Ctrl+S` saves default. Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.3 (fewer turns). Survey lanes pick flash per task (step 12); the main session stays glm-5.3 (mid-session switches re-bill the cache).
+> Default glm-5.3, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.3 (fewer turns). Survey lanes pick flash per task (step 12); the main session stays glm-5.3 (mid-session switches re-bill the cache).
 
 ## 3. Install skills
 
@@ -281,7 +281,6 @@ After all MCP entries are added, `~/.pi/agent/mcp.json` should look like:
 
 > Header and env values expand `${VAR}`. `sse` entries are rejected; SSE-only servers usually expose streamable HTTP at `/mcp`. OAuth servers need no credentials: put the URL in, then `/mcp login <server>`.
 > Manage from the shell: `pi mcp add|remove|list|login|logout`; `/mcp` in-session; `/reload` after edits; logs in `~/.pi/agent/mcp.log`.
-> MCP, `tool_search`, and codemode are built in. Servers here use the default `codemode` exposure — tools never enter context; codemode scripts reach them via `searchTools()` / `describeNamespace()`, and servers appear as one-liners in an `mcp_servers` system-prompt section (fed by the `description` field). Opt a server into `deferred` to get `tool_search` (loaded tools stay declared on that transcript branch); `direct` declares all ~79 tool schemas in every request; `hidden` registers but blocks access. Promote a single hot tool to direct calls with `toolExposure` (a per-server key in `mcp.json`). MCP connections never bust the prompt cache, but each newly declared tool re-bills the prefix once (tool schemas precede messages).
 
 Verify all six connect (exits 1 unless every enabled server connects):
 
@@ -291,7 +290,7 @@ source ~/.zshrc && pi mcp list
 
 ## 11. Codemode
 
-Codemode activates automatically whenever a server uses the default `codemode` exposure — no settings entry required. Disable auto-activation with `autoEnableCodemode: false` in `mcp.json`.
+MCP, `tool_search`, and codemode are built in. The servers above use the default `codemode` exposure, which activates codemode automatically — no settings entry required (disable with `autoEnableCodemode: false` in `mcp.json`). Tools never enter context; servers appear as one-liners in an `mcp_servers` system-prompt section (fed by the `description` field). Opt a server into `deferred` to get `tool_search` (loaded tools stay declared on that transcript branch); `direct` declares all ~79 tool schemas in every request; `hidden` registers but blocks access. Promote a single hot tool to direct calls with `toolExposure` (a per-server key in `mcp.json`). MCP connections never bust the prompt cache, but each newly declared tool re-bills the prefix once (tool schemas precede messages).
 > Codemode runs one model-written JavaScript script (QuickJS sandbox — no fs/network, tools only) whose parallel calls and filtered output are all that reach the context: inside scripts, bash holds up to 1 MiB and MCP results arrive untruncated (direct calls: 50 KB / 20 KB middle-elided). Scripts reach every server's tools via `searchTools()` / `describeNamespace()`.
 > Keep `codemode.mode` at the default `"on"` — direct tool calls stay available; scripts are an extra lane for fan-out. `"only"` hides all other tools — avoid with glm-5.3. `codemode.inlineBudget` (default 3000) caps tool declarations in the codemode description.
 
@@ -307,7 +306,7 @@ MCP servers (config: `~/.pi/agent/mcp.json`) expose tools via `codemode`; promot
 - **gh:** auth and `gh skill` — GitHub reads go through the `gh` MCP, code examples through `gh_grep`. In codemode its results are `{content:[{type,text}]}` envelopes with JSON-string text — join the parts and `JSON.parse`; `get_review_comments` returns `{review_threads:[...]}`, not a flat array.
 - **wandb:** login/sync/artifacts/sweeps — run queries go through the `wandb` MCP.
 - **hf:** auth and `hf skills` — Hub lookups go through the `hf` MCP.
-- **Toolbox on PATH:** `rg`, `fd`, `jq`, `fzf`, `tree`, `ast-grep` (structural search/replace).
+- **Toolbox on PATH:** `rg`, `fd`, `jq`, `fzf`, `tree`, `ast-grep` (structural search/replace), `timeout` (coreutils) for dispatch lanes.
 
 ## Tool selection order
 
@@ -331,7 +330,7 @@ Dispatch when a sub-task deserves its own context: an independent review, a read
       timeout <secs> pi --print --no-session -ns [-ne --tools read,grep,find,ls,bash] [--model zai/glm-5.3-flash] @.pi/work/<task>-brief-<lane>.md > .pi/work/<task>-<lane>.md 2> .pi/work/<task>-<lane>.err & pN=$!
       wait $pN; sN=$?   # per lane, for individual exit codes
 
-   Read-only codebase lane: `-ne --tools read,grep,find,ls,bash` (bash stays for `git diff` / `gh` reads — read-only is enforced by the brief, never the tool list). MCP lane: drop `-ne --tools`, read-only via the brief. Scan lane: pin flash; reasoning lane: omit `--model` to inherit glm-5.3 — pin at spawn, never mid-session (switches re-bill the cache). Classify each lane by its heaviest work: lanes that only grep/read/cross-check (caller sweeps, doc-link checks) pin `--model zai/glm-5.3-flash` regardless of the parent task's weight; only lanes that apply judgment or verdicts inherit the default model. Keep concurrent default-model lanes ≤ 3; batch the rest or pin flash.
+   Read-only codebase lane: `-ne --tools read,grep,find,ls,bash` (`-ne` = `--no-extensions`: drops built-in extensions including MCP and codemode; bash stays for `git diff` / `gh` reads — read-only is enforced by the brief, never the tool list). MCP lane: drop `-ne --tools`, read-only via the brief. Scan lane: pin flash; reasoning lane: omit `--model` to inherit glm-5.3 — pin at spawn, never mid-session (switches re-bill the cache). Classify each lane by its heaviest work: lanes that only grep/read/cross-check (caller sweeps, doc-link checks) pin `--model zai/glm-5.3-flash` regardless of the parent task's weight; only lanes that apply judgment or verdicts inherit the default model. Keep concurrent default-model lanes ≤ 3; batch the rest or pin flash.
    Output mode is part of the launch, and the brief must agree with it: a `--tools` allowlist without `write` means the lane delivers via its final message — stdout redirected to the artifact *is* the deliverable. If the lane writes its own artifact file, add `write` to `--tools` and send stdout to `/dev/null`; never point stdout at a path the lane also writes (the final-message write at exit clobbers the artifact). Use the literal template — one lane per line, no wrapper functions; improvised wrappers mangle redirects (observed: a lane silently never started).
 3. **Check**: non-zero exit or empty output = failed lane — read the `.err`, rerun it alone (`--print` exits 1 with a stderr warning when the final response is cut off at the model's output limit — a truncated artifact is a failed lane, not a flake); rate-limited provider → run lanes sequentially. If the bash call itself timed out, its lanes died with it — keep completed lanes' outputs, rerun the rest longer or sequentially.
 4. **Long lanes** outliving sensible timeouts: detach with nohup + per-lane `.exit`/`.pid` control files (clear stale files first), poll from short bash calls — `.exit` present = finished; `kill -0` = running; neither = killed. Kill at twice the expected time or on abandonment:
@@ -363,16 +362,7 @@ Duties: plan, implement, verify. One session, one coherent change.
 
 > pi loads AGENTS.md from `~/.pi/agent/` + cwd + ancestors (AGENTS.md wins over CLAUDE.md).
 
-## 13. Sub-task dispatch & workflow habits
-
-pi has no sub-agents by design — dispatch a sub-task by spawning pi itself via bash (`pi --print`). The general mechanism lives in the `## Dispatch` section of `~/.pi/agent/AGENTS.md` (step 12): a dispatch is a lane, and the `survey` skill (installed from the repo in step 3) is the parallel application — N=1 for reviews and exploration, N=3–6+ for survey lanes. State lives in files; context gathering happens in its own session. (`-ne` = `--no-extensions`: drops built-in extensions including MCP and codemode; `-ns` = `--no-skills`: dispatched lanes are brief-driven leaves — no skills, no re-dispatch.)
-
-- **Explore first, read-only**: write the brief to `.pi/work/NOTES-brief.md`, then `pi --print --no-session -ns -ne --tools read,grep,find,ls @.pi/work/NOTES-brief.md > .pi/work/NOTES.md` — the redirect is the artifact; a fresh session consumes it for implementation.
-- **Plan**: non-trivial work gets `.pi/work/PLAN.md` (goal, approach, current step); track progress in `.pi/work/TODO.md` checkboxes.
-
-> Parallel research is the one blessed parallel pattern (the author's words); if the provider rate-limits, run lanes sequentially — parallel implementation dispatches remain an anti-pattern.
-
-## 14. Verify
+## 13. Verify
 
 ```bash
 source ~/.zshrc && pi
