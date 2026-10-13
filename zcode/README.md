@@ -4,7 +4,7 @@
 
 ## 1. Install ZCode
 
-Download from https://zcode.z.ai (macOS Apple Silicon / Intel, Windows x64 / ARM64, Linux AppImage). The CLI runtime is embedded in the desktop app — there is no separate CLI to install.
+Download from https://zcode.z.ai (macOS Apple Silicon / Intel, Windows x64 / ARM64, Linux x64 / ARM64 / AppImage / DEB / RPM). The CLI runtime is embedded in the desktop app — there is no separate CLI to install.
 
 Sign in with your Z.ai account and pick a Coding Plan (OAuth, no API keys needed):
 
@@ -12,7 +12,7 @@ Sign in with your Z.ai account and pick a Coding Plan (OAuth, no API keys needed
 
 ## 2. Create the MCP config file
 
-ZCode has no auto-configuration — create `~/.zcode/cli/config.json` yourself. All MCP servers share a single `"mcp"` object in it; add the entries from the following steps into `mcp.servers`. Each step shows just the inner server entry, and a complete merged example is shown at the end of step 8.
+Configure MCPs in **Settings → MCP** (form mode, full-config paste, one-click import) or by hand — this guide edits `~/.zcode/cli/config.json` directly. All MCP servers share a single `"mcp"` object in it; add the entries from the following steps into `mcp.servers`. Each step shows just the inner server entry, and a complete merged example is shown at the end of step 8.
 
 ```jsonc
 {
@@ -30,7 +30,7 @@ ZCode has no auto-configuration — create `~/.zcode/cli/config.json` yourself. 
 > - **No `{env:VAR}` expansion.** Header values must contain the literal token. Restrict the file: `chmod 600 ~/.zcode/cli/config.json`.
 > - Remote servers that support OAuth can skip tokens entirely: enable OAuth on the server in **Settings → MCP** and complete the browser flow via its **Open authorization** button (HTTP/SSE only).
 > - Stdio environment variables use `env`.
-> - Servers are on by default; `"enabled": false` keeps an entry configured without connecting it.
+> - Servers are on by default; `"enable": false` keeps an entry configured without connecting it.
 > - Every configured server (user and workspace scope) auto-connects at session start — only open workspaces you trust.
 
 ## 3. Add GitHub MCP
@@ -61,7 +61,7 @@ Get your key at [wandb.ai/authorize](https://wandb.ai/authorize), then add to `m
 "wandb": {
   "type": "http",
   "url": "https://mcp.withwandb.com/mcp",
-  "enabled": false,
+  "enable": false,
   "headers": {
     "Authorization": "Bearer <YOUR_WANDB_KEY>",
     "Accept": "application/json, text/event-stream"
@@ -69,7 +69,7 @@ Get your key at [wandb.ai/authorize](https://wandb.ai/authorize), then add to `m
 }
 ```
 
-> Disabled by default: wandb has the largest tool catalog of these servers and ZCode loads connected servers' tools into every session. Enable on demand by removing the `"enabled"` line, then restart ZCode.
+> Disabled by default: wandb has the largest tool catalog of these servers and ZCode loads connected servers' tools into every session. Enable on demand by removing the `"enable"` line, then restart ZCode.
 
 > https://github.com/wandb/wandb-mcp-server
 
@@ -149,7 +149,7 @@ After all MCP entries are added, the `"mcp"` object should look like:
     "wandb": {
       "type": "http",
       "url": "https://mcp.withwandb.com/mcp",
-      "enabled": false,
+      "enable": false,
       "headers": {
         "Authorization": "Bearer <YOUR_WANDB_KEY>",
         "Accept": "application/json, text/event-stream"
@@ -297,7 +297,7 @@ Restart ZCode, then check MCPs, skills, and tool routing:
 
 ## 16. Local state and scope
 
-- **Settings are local-only.** Your Z.ai account covers auth and billing, not configuration. Nothing is synced between machines. The files that matter: `~/.zcode/AGENTS.md`, `~/.zcode/cli/config.json`, `~/.zcode/v2/config.json` (model/provider selection), `~/.zcode/v2/agents-state.json` (subagent overrides), `~/.agents/skills/` (+ `.skill-lock.json`), and optionally `~/.zcode/v2/setting.json` (desktop preferences). Manage them in dotfiles or a sync script across machines; keep `config.json` private (it holds tokens).
+- **Settings are local-only.** Your Z.ai account covers auth and billing, not configuration. Nothing is synced between machines. The files that matter: `~/.zcode/AGENTS.md`, `~/.zcode/cli/config.json`, `~/.zcode/v2/config.json` (model/provider selection), `~/.zcode/v2/agents-state.json` (subagent overrides), `~/.agents/skills/` (+ `.skill-lock.json`), and optionally `~/.zcode/v2/setting.json` (desktop preferences). Never copy across machines: `~/.zcode/v2/credentials.json` (encrypted per device) and `~/.zcode/v2/telemetry-state.json` (device identifier). Manage the rest in dotfiles or a sync script; keep `config.json` private (it holds tokens).
 - **Secrets are stored in plaintext.** ZCode does not expand `{env:VAR}` in MCP headers, so tokens sit directly in `~/.zcode/cli/config.json`, and provider API keys in `~/.zcode/v2/config.json`. Restrict both with `chmod 600` and rotate tokens if either ever leaks; servers that support OAuth avoid the token entirely (step 2).
 - **Scope and precedence.** User scope overrides workspace scope for same-named MCP servers and skills. Workspace-level MCP config (`<repo>/.zcode/config.json`) auto-connects, so only open repos you trust.
 - **No LSP execution.** Plugin `lspServers` are recorded but never executed — there is no LSP install step.
