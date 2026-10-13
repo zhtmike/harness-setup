@@ -23,6 +23,16 @@ pi --version
 
 > The homebrew-core formula is `pi-coding-agent` (not `pi`) and can lag releases — the curl/npm paths are always current; npm needs Node ≥ 22.19. Update with `brew upgrade pi-coding-agent`. https://github.com/earendil-works/pi
 
+**Terminal (macOS):**
+
+> Not Terminal.app — it has no OSC 52 support, so pi's in-app copy over ssh (`Ctrl+X` last assistant message, selection + `Ctrl+C`) never reaches the Mac clipboard. Use a terminal that supports OSC 52:
+>
+> ```bash
+> brew install --cask ghostty
+> ```
+>
+> Ghostty supports OSC 52 out of the box. Pasting into pi needs no OSC 52 — the terminal's normal paste (`Cmd+V`) types through ssh into pi's editor. Probe from the remote host: `printf '\033]52;c;%s\007' "$(printf 'clipboard-ok' | base64)"` — `clipboard-ok` pasteable on the Mac means pi's copy keys land too.
+
 ## 2. Configure provider (Z.AI Coding Plan)
 
 Get your key at https://z.ai/manage-apikey/account. Add to your shell rc file (`~/.zshrc` on macOS, `~/.bashrc` on Linux):
