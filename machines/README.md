@@ -15,3 +15,11 @@ ZCode reads only `~/.zcode/AGENTS.md` (user global) and the current workspace's 
 Non-default local state (default values are never recorded):
 
 - pi `~/.pi/agent/settings.json` carries `hideThinkingBlock: true` beyond the guide payload (default `false`).
+
+## Support scripts
+
+`scripts/git-pull-all.sh` pulls every git repo directly under a base dir (default `~/gitlocal/`) to its remote default branch, preferring the `official` remote over `origin` and skipping dirty trees. Install so the canonical invocation path keeps working:
+
+```bash
+ln -sfn ~/gitlocal/harness-setup/scripts/git-pull-all.sh ~/gitlocal/git-pull-all.sh
+```
