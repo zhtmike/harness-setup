@@ -8,6 +8,8 @@ Personal harness setup guides — one `<harness>/README.md` per harness. A new h
 - Skill rosters track zhtmike/skills — when that repo adds, removes, or splits a skill, every guide's symlink step and skill checklist update in the same change; the h800-* cluster skills are deliberately out of the harness guides and join a roster only on explicit request.
 - Placeholders only — `<YOUR_TOKEN>` / `${ENV_VAR}` forms. Never a real token, in content or in history.
 - The shared spine (install → providers → MCP servers → AGENTS.md guidance → skills → verify) is deliberate; keep new guides on it where it applies.
+- Machine profiles live in `machines/` — one payload-pure doc per machine, harness-agnostic wording, loaded verbatim into agent context; install notes and non-default local state belong in `machines/README.md`, never in the payload. Harness guides stay machine-neutral.
+- Install steps reference the payload doc rather than inlining it — the one deliberate exception to the no-forward-pointer rule, because inlining the payload is the drift this structure exists to prevent.
 - Commit messages carry the why — the gists these came from had empty messages; that gap is the reason this repo exists. Content is docs: guide edits use the `docs` type.
 - Commit messages describe guide changes only — no quoted user instructions, session habits, node-sync narratives, or local paths beyond the guides' own content; machine wiring is local state.
 - Commits go through the fresh-review gate (the global commit-gate skill); draft the full message first.

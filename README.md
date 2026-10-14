@@ -12,6 +12,10 @@ The guides share a deliberate spine (install → providers → MCP servers → A
 | `opencode` | [opencode/README.md](opencode/README.md) |
 | `zcode` | [zcode/README.md](zcode/README.md) |
 
+## Machine profiles
+
+Machine-scoped agent guidance, one payload doc per machine — [machines/](machines/README.md).
+
 ## Provenance
 
 Imported 2026-10-05 from three gists, byte-identical, histories squashed (gist commits carry no messages). Source gists deleted after import; this table is the surviving record:
