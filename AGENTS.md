@@ -3,6 +3,7 @@
 Personal harness setup guides — one `<harness>/README.md` per harness. A new harness gets a new directory; a retired harness's directory gets deleted, and the commit message says so (outside links may point here).
 
 - Guides document personal machine setup: verify a claim against the harness's official docs before changing it — staleness fixes land in their own commits, never folded into unrelated changes.
+- MCP claims verify against the live surface, not docs alone — `pi mcp list` for the registered tool surface, a codemode probe call for result shapes; only the live listing proves what registers today (gh retired `get_review_comments` into a `pull_request_read` method with no signal reaching the guide).
 - Guides are version-free — content documents the harness's current release and carries no "since X.Y" dating; which release a claim was verified against is commit-message provenance, never guide content.
 - Steps are self-contained and reproducible — each carries its full payload inline (commands, config blocks to paste); a combined whole-file example may repeat step payloads, but a step never delegates its payload to a forward pointer.
 - Skill rosters track zhtmike/skills — when that repo adds, removes, or splits a skill, every guide's symlink step and skill checklist update in the same change; the h800-* cluster skills are deliberately out of the harness guides and join a roster only on explicit request.
