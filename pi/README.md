@@ -62,11 +62,12 @@ mkdir -p ~/.pi/agent
   "defaultModel": "glm-5.3",
   "defaultThinkingLevel": "max",
   "enabledModels": ["zai/glm-5.3", "zai/glm-5.3-flash"],
-  "showCacheMissNotices": true
+  "showCacheMissNotices": true,
+  "packages": ["npm:pi-minimal-dispatch"]
 }
 ```
 
-> Default glm-5.3, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.3 (fewer turns). Survey lanes pick flash per task (step 12); the main session stays glm-5.3 (mid-session switches re-bill the cache).
+> Default glm-5.3, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.3 (fewer turns). Survey lanes pick flash per task (step 13); the main session stays glm-5.3 (mid-session switches re-bill the cache).
 
 ## 3. Install skills
 
@@ -102,7 +103,7 @@ brew install gh node ripgrep fd jq fzf tree ast-grep coreutils
 conda install -c conda-forge wandb huggingface_hub            # fallback: pip install wandb huggingface_hub
 ```
 
-> Toolbox: `rg` fast search · `fd` find · `jq` JSON · `fzf` fuzzy filter · `tree` directory overview · `ast-grep` structural search/replace · `timeout` (coreutils) for dispatch lanes (step 12).
+> Toolbox: `rg` fast search · `fd` find · `jq` JSON · `fzf` fuzzy filter · `tree` directory overview · `ast-grep` structural search/replace · `timeout` (coreutils) for dispatch lanes (step 13).
 
 Login each CLI (env vars are the non-interactive equivalent — enough to put the exports in `~/.zshrc`):
 
@@ -306,7 +307,15 @@ MCP, `tool_search`, and codemode are built in. The servers above use the default
 > Codemode runs one model-written JavaScript script (QuickJS sandbox — no fs/network, tools only) whose parallel calls and filtered output are all that reach the context: inside scripts, bash holds up to 1 MiB and MCP results arrive untruncated (direct calls: 50 KB / 20 KB middle-elided). Scripts reach every server's tools via `searchTools()` / `describeNamespace()`.
 > Keep `codemode.mode` at the default `"on"` — direct tool calls stay available; scripts are an extra lane for fan-out. `"only"` hides all other tools — avoid with glm-5.3. `codemode.inlineBudget` (default 3000) caps tool declarations in the codemode description.
 
-## 12. Add MCP usage guidance to AGENTS.md
+## 12. Install the dispatch extension
+
+```bash
+pi install npm:pi-minimal-dispatch
+```
+
+> Writes the `packages` entry into `~/.pi/agent/settings.json` (shown in step 2's payload) and the package into `~/.pi/agent/npm/`. `pi-minimal-dispatch` provides the `dispatch`/`lanes` tools the Dispatch section (next step) runs on: detached lanes that survive the session, derived state, parentless deadline leash, manifest re-adoption. Update with `pi update --extensions`, remove with `pi remove npm:pi-minimal-dispatch`; the git source (`pi install git:github.com/zhtmike/pi-minimal-dispatch`) tracks main between releases. If the tools ever go missing, the retired bash template is recoverable: `git log -S 'nohup sh -c' -- pi/README.md`.
+
+## 13. Add usage guidance to AGENTS.md
 
 `~/.pi/agent/AGENTS.md`:
 
@@ -332,24 +341,16 @@ MCP servers (config: `~/.pi/agent/mcp.json`) expose tools via `codemode`; promot
 
 ## Dispatch — sub-tasks via fresh pi instances
 
-pi has no sub-agents by design; dispatch by spawning pi itself. A dispatch is a lane: one brief, one artifact, an independent leaf — own context, read-only, the brief is its whole job; no skills (`-ns`), no workflow duties, no re-dispatch.
+pi has no sub-agents by design; dispatch by spawning pi itself. A dispatch is a lane: one brief, one artifact, an independent leaf — own context, read-only, the brief is its whole job; no skills, no workflow duties, no re-dispatch (lanes are env-marked so the dispatch tools never load inside them). The `pi-minimal-dispatch` extension provides the mechanics: `dispatch` spawns detached lanes that survive this session, `lanes` derives their state, kills, and collects artifacts — every wave is re-adoptable from its manifest by any later session.
 
 Dispatch when a sub-task deserves its own context: an independent review, a read-only exploration before implementing, parallel investigation lanes, or verification of a risky change. Skills route by trigger and say what; dispatch is how a lane runs — the brief carries everything, the lane itself loads nothing. Parallel research lanes are the one blessed parallel pattern; never dispatch parallel implementation.
 
-1. **Brief** per lane → `.pi/work/<task>-brief-<lane>.md` (names are kebab-case slugs, no spaces): goal, scope, expected deliverable and its output format, what not to do; state that the addressee is a dispatched leaf. Check no existing lane already covers the objective. Pass with `@file` — never shell-quoted.
-2. **Spawn** each lane under an explicit timeout (pi's bash has no default — a stalled lane hangs the caller). One bash call, one line per lane, PID per lane — N=1 for a review or exploration, N=3–6+ for a parallel investigation:
+1. **Brief** per lane → `.pi/work/<task>-brief-<lane>.md` (names are kebab-case slugs, no spaces): goal, scope, expected deliverable and its output format, what not to do; state that the addressee is a dispatched leaf. Check no existing wave already covers the objective (`ls .pi/work/*-manifest.json`). The brief's final assistant message is the deliverable — `collect` writes it to `.pi/work/<wave>-<name>.md`; slugs are single-use, so a rerun is a new wave.
+2. **Spawn** with the `dispatch` tool: `wave` + `lanes[]`, one entry per lane — `briefPath`, and per lane: `model` (lanes that only grep/read/cross-check pin `zai/glm-5.3-flash`; only lanes that apply judgment or verdicts omit it to inherit pi's default — pin at spawn, never mid-session), `deadlineSec` (an explicit leash — it holds even after this session exits), `tools` (code lanes: `"read,grep,find,ls,bash"` — read-only is enforced by the brief, never the tool list; omitted `tools` is already read-only), `noExtensions: true` for lanes that must not see MCP. The call returns immediately and the dispatcher stays free. Keep concurrent default-model lanes ≤ 3; batch the rest or pin flash. The caller bounds the wave — every lane in the call is spawned.
+3. **Check** with `lanes` (`action: "status"`): state and cause, turns, usage, `stopReason`, `lastEventAgeSec`. `failed` decomposes into spawn/killed/deadline/crashed (an `.err` tail is attached when the cause is unknown); truncation is caught by `stopReason` and the collect `[SUSPECT]` flag — a suspect artifact is not done. `lastEventAgeSec` well past the lane's normal turn latency = hung → `kill` and redispatch with a refined brief. Rate-limited provider → run lanes sequentially.
+4. **Long lanes** need no special ceremony: dispatch and poll from later turns — or from a later session, which re-adopts the wave from its manifest. Never delete `.pi/work` while a leash can still be running; the manifest is the only re-adopt record.
+5. **Consume, then clean**: `lanes` `action: "collect"` → read the artifacts to judge them (do not paste them back into the conversation), then delete artifacts, briefs, events, and manifests — `.pi/work/` stays ephemeral.
 
-      timeout <secs> pi --print --no-session -ns [-ne --tools read,grep,find,ls,bash] [--model zai/glm-5.3-flash] @.pi/work/<task>-brief-<lane>.md > .pi/work/<task>-<lane>.md 2> .pi/work/<task>-<lane>.err & pN=$!
-      wait $pN; sN=$?   # per lane, for individual exit codes
-
-   Read-only codebase lane: `-ne --tools read,grep,find,ls,bash` (`-ne` = `--no-extensions`: drops built-in extensions including MCP and codemode; bash stays for `git diff` / `gh` reads — read-only is enforced by the brief, never the tool list). MCP lane: drop `-ne --tools`, read-only via the brief. Scan lane: pin flash; reasoning lane: omit `--model` to inherit glm-5.3 — pin at spawn, never mid-session (switches re-bill the cache). Classify each lane by its heaviest work: lanes that only grep/read/cross-check (caller sweeps, doc-link checks) pin `--model zai/glm-5.3-flash` regardless of the parent task's weight; only lanes that apply judgment or verdicts inherit the default model. Keep concurrent default-model lanes ≤ 3; batch the rest or pin flash.
-   Output mode is part of the launch, and the brief must agree with it: a `--tools` allowlist without `write` means the lane delivers via its final message — stdout redirected to the artifact *is* the deliverable. If the lane writes its own artifact file, add `write` to `--tools` and send stdout to `/dev/null`; never point stdout at a path the lane also writes (the final-message write at exit clobbers the artifact). Use the literal template — one lane per line, no wrapper functions; improvised wrappers mangle redirects (observed: a lane silently never started).
-3. **Check**: non-zero exit or empty output = failed lane — read the `.err`, rerun it alone (`--print` exits 1 with a stderr warning when the final response is cut off at the model's output limit — a truncated artifact is a failed lane, not a flake); rate-limited provider → run lanes sequentially. If the bash call itself timed out, its lanes died with it — keep completed lanes' outputs, rerun the rest longer or sequentially.
-4. **Long lanes** outliving sensible timeouts: detach with nohup + per-lane `.exit`/`.pid` control files (clear stale files first), poll from short bash calls — `.exit` present = finished; `kill -0` = running; neither = killed. Kill at twice the expected time or on abandonment:
-
-      rm -f .pi/work/<task>-<lane>.exit .pi/work/<task>-<lane>.pid && nohup sh -c 'timeout <secs> pi --print --no-session -ns [--model zai/glm-5.3-flash] @.pi/work/<task>-brief-<lane>.md > .pi/work/<task>-<lane>.md 2> .pi/work/<task>-<lane>.err; echo $? > .pi/work/<task>-<lane>.exit' >/dev/null 2>&1 & echo $! > .pi/work/<task>-<lane>.pid
-
-5. **Consume, then clean**: read the artifacts, delete them with the briefs, `.err`s, and control files — `.pi/work/` stays ephemeral.
 
 # Workflow Habits
 
@@ -374,7 +375,7 @@ Duties: plan, implement, verify. One session, one coherent change.
 
 > pi loads AGENTS.md from `~/.pi/agent/` + cwd + ancestors (AGENTS.md wins over CLAUDE.md).
 
-## 13. Verify
+## 14. Verify
 
 ```bash
 source ~/.zshrc && pi
@@ -383,7 +384,7 @@ source ~/.zshrc && pi
 Inside pi:
 
 1. `/model` → zai/glm-5.3; `Shift+Tab` → max; `Ctrl+S` to save.
-2. `/mcp` → all six servers connected (or `pi mcp list` from the shell).
+2. `/mcp` → all six servers connected (or `pi mcp list` from the shell); `pi list` → `npm:pi-minimal-dispatch` installed (dispatch/lanes tools load).
 3. "Run `gh auth status`" → authenticated. Same for `hf auth whoami` and `wandb status`.
 4. "List your skills" → grilling, code-review, coding-style, spike, propose, commit-gate, survey, self-learn (grill-me is installed but hidden by design — `disable-model-invocation`).
 5. Smoke test: `/skill:survey <small topic>` → investigation lanes dispatched per the Dispatch section, one synthesized answer; "review this diff" → a single dispatched reviewer.
