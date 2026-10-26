@@ -313,7 +313,7 @@ MCP, `tool_search`, and codemode are built in. The servers above use the default
 pi install npm:pi-minimal-dispatch
 ```
 
-> Writes the `packages` entry into `~/.pi/agent/settings.json` (shown in step 2's payload) and the package into `~/.pi/agent/npm/`. `pi-minimal-dispatch` provides the `dispatch`/`lanes` tools the Dispatch section (next step) runs on: detached lanes that survive the session, derived state, a bounded `lanes wait` action, parentless deadline leash, manifest re-adoption; requires pi ≥ 1.4.0. Update with `pi update --extensions`, remove with `pi remove npm:pi-minimal-dispatch`; the git source (`pi install git:github.com/zhtmike/pi-minimal-dispatch`) tracks main between releases. If the tools ever go missing, the retired bash template is recoverable: `git log -S 'nohup sh -c' -- pi/README.md`.
+> Writes the `packages` entry into `~/.pi/agent/settings.json` (shown in step 2's payload) and the package into `~/.pi/agent/npm/`. `pi-minimal-dispatch` provides the `dispatch`/`lanes` tools the Dispatch section (next step) runs on: detached lanes that survive the session, derived state, a bounded `lanes wait` action, parentless deadline leash, manifest re-adoption, wave `release` with dispatcher ownership (kill and release refuse a live foreign owner); requires pi ≥ 1.4.0. Update with `pi update --extensions`, remove with `pi remove npm:pi-minimal-dispatch`; the git source (`pi install git:github.com/zhtmike/pi-minimal-dispatch`) tracks main between releases. If the tools ever go missing, the retired bash template is recoverable: `git log -S 'nohup sh -c' -- pi/README.md`.
 
 ## 13. Add usage guidance to AGENTS.md
 
@@ -336,9 +336,9 @@ MCP tool declarations self-describe — read them before calling (`describeTool`
 pi has no sub-agents by design; dispatch spawns independent read-only lanes (the tools describe their mechanics); the policy:
 
 - Dispatch when a sub-task deserves its own context: an independent review, read-only exploration before implementing, parallel investigation lanes, verification of a risky change. Parallel research is the one blessed parallel pattern.
-- Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf.
+- Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf. Park briefs under your own `.pi/work/s/$PI_SESSION_ID/`: they are written before the wave claim, so bare `.pi/work/` briefs collide across sessions.
 - Tier with the job; pin model + thinking together at spawn, never mid-session: fast model (settings' `enabledModels` carries the fast tier) + low thinking for mechanical recon, fast + medium for substantive investigation; judgment/verdict lanes run unpinned on the default model. Never pin the fast model bare — a model-only pin inherits the global default thinking level. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
-- Never delete `.pi/work` while a leash can still be running — the manifest is the only re-adopt record. Otherwise consume, then clean: collect artifacts, judge them, delete briefs, events, and manifests — `.pi/work/` stays ephemeral.
+- Never delete `.pi/work` while a leash can still be running — the manifest is the only re-adopt record. Otherwise consume — collect artifacts, judge them — then `lanes action=release` the settled wave: it deletes exactly the wave's own files and refuses foreign-owned ones; a hand-sweep of `.pi/work` is how one session destroys another's. Never signal a wave you didn't dispatch, and a write-capable lane edits only under the dispatcher's claim.
 ```
 
 `~/.pi/agent/APPEND_SYSTEM.md`:
@@ -348,8 +348,9 @@ pi has no sub-agents by design; dispatch spawns independent read-only lanes (the
 
 Duties: plan, implement, verify. One session, one coherent change.
 
-- Non-trivial work: write `.pi/work/PLAN.md` first, track in `.pi/work/TODO.md`.
-- Artifacts are ephemeral: when the change ships, delete its `.pi/work/` files — stale plans mislead fresh sessions.
+- Non-trivial work: write `.pi/work/PLAN.md` first, track in `.pi/work/TODO.md` — both under your session dir `.pi/work/s/$PI_SESSION_ID/` (the full id).
+- Artifacts are ephemeral: when the change ships, delete its `.pi/work/` files — yours only: your session dir and your settled waves (`lanes action=release`); another session's artifacts are never yours to delete. Stale plans mislead fresh sessions; a sweep destroys siblings.
+- Concurrent sessions share the checkout: claim it before the first edit — `.pi/OWNER.json` `{sid,pid,host,lstart}` (pid `ps -o ppid= -p $$`, live iff its start-time string still matches), written noclobber. A live foreign claim ⇒ run the task in a worktree outside `~/gitlocal`, never the shared tree; dead ⇒ replace; yours ⇒ release at wind-down.
 - Context gathering: separate read-only session → artifact file → implementation in a fresh session that reads the artifact (never dispatch parallel implementing agents).
 - Workflow skills (survey) dispatch parallel investigation lanes; never invoke
   them from inside a dispatched instance. Before finishing risky changes, dispatch
@@ -358,6 +359,8 @@ Duties: plan, implement, verify. One session, one coherent change.
 ```
 
 > pi loads AGENTS.md from `~/.pi/agent/` + cwd + ancestors (AGENTS.md wins over CLAUDE.md).
+
+> The isolation rules exist because concurrent sessions in one repo share `.pi/work` and the checkout: session dirs namespace scratch (the full session id — a uuidv7 prefix is a ~65 s timestamp window that collides for concurrent sessions), `release` is the only wave cleanup, and the OWNER claim keeps one editor per checkout (a second task takes a worktree). Refusals met there are by design — never worked around.
 
 ## 14. Verify
 
