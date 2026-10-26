@@ -265,25 +265,29 @@ Toggle them off in **Settings → Plugins**; the toggle writes to `~/.zcode/cli/
 
 The main model needs no configuration: ZCode runs Z.ai's GLM models through your Coding Plan and you pick the model in the app's model selector.
 
-**Subagent overrides**: run the Explore subagent on the fast model (GLM-5.3-Flash) while the main conversation stays on GLM-5.3 — cheap recon, strong main loop. In **Settings → Subagents**, set:
+**Subagent overrides**: run the Explore subagent on the fast model (GLM-5.3-Flash) while the main conversation stays on GLM-5.3 — cheap recon, strong main loop. Thought level defaults to the model's top tier, so a model-only override leaves recon running at `max` — tier Explore down with it. In **Settings → Subagents**, set:
 
-| Subagent | Model |
-|---|---|
-| Explore | GLM-5.3-Flash |
+| Subagent | Model | Thought level |
+|---|---|---|
+| Explore | GLM-5.3-Flash | Low |
 
-Stored in `~/.zcode/v2/agents-state.json`:
+Valid levels are what the picker lists for the model (GLM-5.3: low / high / max — no medium). Stored in `~/.zcode/v2/agents-state.json` as a model selection carrying a reasoning level:
 
 ```json
 {
-  "builtInModelOverrides": {
-    "Explore": "custom:builtin%3Azai-coding-plan:GLM-5.3-Flash"
+  "builtInModelSelectionOverrides": {
+    "Explore": {
+      "providerId": "account:zai-individual-coding-plan",
+      "modelId": "GLM-5.3-Flash",
+      "options": { "reasoningLevel": "low" }
+    }
   },
-  "builtInThoughtLevelOverrides": {},
+  "pluginAgentModelSelectionOverrides": {},
   "disabledAgentIds": []
 }
 ```
 
-> Internal state file (undocumented — the Settings UI is the supported path). The app adds its own keys alongside (e.g. `builtInModelSelectionOverrides` mirroring the same override in selection form) — leave them alone. Custom subagents (Beta) are separate: `~/.zcode/agents/<name>.md` markdown files with `model`/`thoughtLevel`/`tools` frontmatter.
+> Internal state file (undocumented — the Settings UI is the supported path). The selection map is authoritative; the legacy `builtInModelOverrides` / `builtInThoughtLevelOverrides` maps the app may keep alongside are rollback-only and never re-read once selections exist. `providerId` is account-shaped — read it from what the app already wrote, never invent it. Custom subagents (Beta) are separate: `~/.zcode/agents/<name>.md` markdown files with `model`/`thoughtLevel`/`tools` frontmatter.
 
 ## 14. Desktop preferences
 

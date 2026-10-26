@@ -341,24 +341,26 @@ Replace `~/.config/opencode/oh-my-opencode-slim.json`:
     "deepseek": {
       "orchestrator": { "model": "deepseek/deepseek-v4-pro", "variant": "max", "skills": ["*"], "mcps": ["*", "!context7"] },
       "oracle":       { "model": "deepseek/deepseek-v4-pro", "variant": "max", "skills": ["code-review"], "mcps": ["gh"] },
-      "librarian":    { "model": "deepseek/deepseek-flash", "variant": "max", "skills": [], "mcps": ["context7", "gh_grep", "gh", "hf", "wandb"] },
-      "explorer":     { "model": "deepseek/deepseek-flash", "variant": "max", "skills": [], "mcps": ["gh", "wandb"] },
-      "designer":     { "model": "deepseek/deepseek-flash", "variant": "max", "skills": ["coding-style"], "mcps": [] },
-      "fixer":        { "model": "deepseek/deepseek-flash", "variant": "max", "skills": ["coding-style"], "mcps": [] }
+      "librarian":    { "model": "deepseek/deepseek-flash", "variant": "low", "skills": [], "mcps": ["context7", "gh_grep", "gh", "hf", "wandb"] },
+      "explorer":     { "model": "deepseek/deepseek-flash", "variant": "low", "skills": [], "mcps": ["gh", "wandb"] },
+      "designer":     { "model": "deepseek/deepseek-flash", "variant": "high", "skills": ["coding-style"], "mcps": [] },
+      "fixer":        { "model": "deepseek/deepseek-flash", "variant": "high", "skills": ["coding-style"], "mcps": [] }
     },
     "glm": {
       "orchestrator": { "model": "zai-coding-plan/glm-5.3", "variant": "max", "skills": ["*"], "mcps": ["*", "!context7"] },
       "oracle":       { "model": "zai-coding-plan/glm-5.3", "variant": "max", "skills": ["code-review"], "mcps": ["gh"] },
-      "librarian":    { "model": "zai-coding-plan/glm-5.3-flash", "variant": "max", "skills": [], "mcps": ["context7", "gh_grep", "gh", "hf", "wandb"] },
-      "explorer":     { "model": "zai-coding-plan/glm-5.3-flash", "variant": "max", "skills": [], "mcps": ["gh", "wandb"] },
-      "designer":     { "model": "zai-coding-plan/glm-5.3-flash", "variant": "max", "skills": ["coding-style"], "mcps": [] },
-      "fixer":        { "model": "zai-coding-plan/glm-5.3-flash", "variant": "max", "skills": ["coding-style"], "mcps": [] }
+      "librarian":    { "model": "zai-coding-plan/glm-5.3-flash", "variant": "low", "skills": [], "mcps": ["context7", "gh_grep", "gh", "hf", "wandb"] },
+      "explorer":     { "model": "zai-coding-plan/glm-5.3-flash", "variant": "low", "skills": [], "mcps": ["gh", "wandb"] },
+      "designer":     { "model": "zai-coding-plan/glm-5.3-flash", "variant": "high", "skills": ["coding-style"], "mcps": [] },
+      "fixer":        { "model": "zai-coding-plan/glm-5.3-flash", "variant": "high", "skills": ["coding-style"], "mcps": [] }
     }
   }
 }
 ```
 
 > When omo-slim updates its stock defaults, re-run step 4 then re-apply this config.
+>
+> `variant` is the model's reasoning effort, and GLM-5.3 / DeepSeek expose exactly `low` / `high` / `max` — there is no `medium`. Variants tier with the job, main session stays `max`: `low` for lookup/recon (librarian, explorer), `high` for substantive-but-bounded work (designer, fixer), `max` for judgment (orchestrator, oracle). omo-slim's preset editor clears a variant the newly picked model doesn't expose — after re-picking models, re-check these values.
 
 ## 15. Verify
 
