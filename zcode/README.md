@@ -187,7 +187,7 @@ ZCode reads `~/.zcode/AGENTS.md` as user-level instructions in every workspace, 
 ```markdown
 ## Tool Guidance
 
-MCP tools (`mcp__*`) self-describe — read declarations before calling — and take priority over raw CLI. WebSearch (built-in) covers current information when local sources and library docs don't suffice.
+MCP tools (`mcp__*`) self-describe — read declarations before calling — and take priority over raw CLI.
 
 ### Tool selection order
 

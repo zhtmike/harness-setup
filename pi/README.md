@@ -322,7 +322,7 @@ pi install npm:pi-minimal-dispatch
 ```markdown
 # Tool Guidance
 
-MCP servers (config: `~/.pi/agent/mcp.json`) expose tools via `codemode`; tool declarations self-describe — read them before calling. Prefer MCP over raw CLI: GitHub reads via `gh` (code examples via `gh_grep`), run queries via `wandb`, Hub lookups via `hf`. In codemode, MCP results are `{content:[{type,text}]}` envelopes with JSON-string text — join the parts and `JSON.parse`.
+MCP tool declarations self-describe — read them before calling (`describeTool` in codemode), and prefer MCP over raw CLI. In codemode, MCP results are `{content:[{type,text}]}` envelopes with JSON-string text — join the parts and `JSON.parse`.
 
 ## Tool selection order
 
@@ -333,7 +333,7 @@ MCP servers (config: `~/.pi/agent/mcp.json`) expose tools via `codemode`; tool d
 
 ## Dispatch — sub-tasks via fresh pi instances
 
-pi has no sub-agents by design; dispatch spawns fresh pi instances as independent read-only lanes — one brief, one artifact, no re-dispatch. The tools describe their own mechanics; the policy:
+pi has no sub-agents by design; dispatch spawns independent read-only lanes (the tools describe their mechanics); the policy:
 
 - Dispatch when a sub-task deserves its own context: an independent review, read-only exploration before implementing, parallel investigation lanes, verification of a risky change. Parallel research is the one blessed parallel pattern.
 - Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf.

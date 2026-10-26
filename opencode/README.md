@@ -263,7 +263,7 @@ Add routing policy to `~/.config/opencode/AGENTS.md` — MCP-over-CLI precedence
 ```markdown
 ## Tool Guidance
 
-MCP tools self-describe — read declarations before calling. Prefer MCP tools over raw CLI: GitHub operations via `gh_*`, code search via `gh_grep_*`, W&B via `wandb_*`, Hub lookups via `hf_*`. @librarian owns context7 and deeper Hub research — other agents delegate docs lookups to it.
+MCP tools self-describe — read declarations before calling — and take priority over raw CLI. @librarian owns context7 and deeper Hub research — other agents delegate docs lookups to it.
 
 ### Tool selection order
 
