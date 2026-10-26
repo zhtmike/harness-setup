@@ -103,7 +103,7 @@ brew install gh node ripgrep fd jq fzf tree ast-grep coreutils
 conda install -c conda-forge wandb huggingface_hub            # fallback: pip install wandb huggingface_hub
 ```
 
-> Toolbox: `rg` fast search · `fd` find · `jq` JSON · `fzf` fuzzy filter · `tree` directory overview · `ast-grep` structural search/replace · `timeout` (coreutils) for dispatch lanes (step 13).
+> Toolbox: `rg` fast search · `fd` find · `jq` JSON · `fzf` fuzzy filter · `tree` directory overview · `ast-grep` structural search/replace · `timeout` (coreutils) bounds long-running commands.
 
 Login each CLI (env vars are the non-interactive equivalent — enough to put the exports in `~/.zshrc`):
 
@@ -322,39 +322,23 @@ pi install npm:pi-minimal-dispatch
 ```markdown
 # Tool Guidance
 
-MCP servers (config: `~/.pi/agent/mcp.json`) expose tools via `codemode`; promote a hot tool to direct calls with `toolExposure` in that config. CLI tools complement them — help output loads on demand.
-
-- **gh:** auth and `gh skill` — GitHub reads go through the `gh` MCP, code examples through `gh_grep`. In codemode its results are `{content:[{type,text}]}` envelopes with JSON-string text — join the parts and `JSON.parse`. Reads consolidate into multi-method tools — `pull_request_read` / `issue_read` take a `method` (`get`, `get_diff`, `get_review_comments`, …); their number params differ (`pullNumber` on the PR tool, `issue_number` on the issue tool); review comments come back as `{review_threads:[...]}` with cursor pagination, not a flat array.
-- **wandb:** login/sync/artifacts/sweeps — run queries go through the `wandb` MCP.
-- **hf:** auth and `hf skills` — Hub lookups go through the `hf` MCP.
-- **Toolbox on PATH:** `rg`, `fd`, `jq`, `fzf`, `tree`, `ast-grep` (structural search/replace), `timeout` (coreutils) for dispatch lanes.
+MCP servers (config: `~/.pi/agent/mcp.json`) expose tools via `codemode`; tool declarations self-describe — read them before calling. Prefer MCP over raw CLI: GitHub reads via `gh` (code examples via `gh_grep`), run queries via `wandb`, Hub lookups via `hf`. In codemode, MCP results are `{content:[{type,text}]}` envelopes with JSON-string text — join the parts and `JSON.parse`.
 
 ## Tool selection order
 
 1. Local codebase → `rg`/`fd` first, then read; `ast-grep` for structural queries.
-2. Library/dependency internals → check `~/gitlocal/<name>` before any network search.
-3. Library documentation → `context7`.
-4. Real-world usage examples → `gh_grep`.
-5. GitHub issues/PRs/CI → `gh`.
-6. Papers and Hub lookups → `hf`; W&B → `wandb`.
-7. Everything else current/external → `websearch`; curl via bash as fallback.
+2. Library/dependency internals → `~/gitlocal/<name>` before any network search (machine profile owns the rule).
+3. Library docs → `context7`; usage examples → `gh_grep`; GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`; W&B → `wandb`.
+4. Everything else current/external → `websearch`; curl via bash as fallback.
 
 ## Dispatch — sub-tasks via fresh pi instances
 
-pi has no sub-agents by design; dispatch by spawning pi itself. A dispatch is a lane: one brief, one artifact, an independent leaf — own context, read-only, the brief is its whole job; no skills, no workflow duties, no re-dispatch (lanes are env-marked so the dispatch tools never load inside them). The `pi-minimal-dispatch` extension provides the mechanics: `dispatch` spawns detached lanes that survive this session, `lanes` derives their state, kills, and collects artifacts — every wave is re-adoptable from its manifest by any later session.
+pi has no sub-agents by design; dispatch spawns fresh pi instances as independent read-only lanes — one brief, one artifact, no re-dispatch. The tools describe their own mechanics; the policy:
 
-Dispatch when a sub-task deserves its own context: an independent review, a read-only exploration before implementing, parallel investigation lanes, or verification of a risky change. Skills route by trigger and say what; dispatch is how a lane runs — the brief carries everything, the lane itself loads nothing. Parallel research lanes are the one blessed parallel pattern; never dispatch parallel implementation.
-
-1. **Brief** per lane → `.pi/work/<task>-brief-<lane>.md` (names are kebab-case slugs, no spaces): goal, scope, expected deliverable and its output format, what not to do; state that the addressee is a dispatched leaf. Check no existing wave already covers the objective (`ls .pi/work/*-manifest.json`). The brief's final assistant message is the deliverable — `collect` writes it to `.pi/work/<wave>-<name>.md`; slugs are single-use, so a rerun is a new wave.
-2. **Spawn** with the `dispatch` tool: `wave` + `lanes[]`, one entry per lane — `briefPath`, and per lane: `model` + `thinking` (tiered together — mechanical recon/cross-check: `zai/glm-5.3-flash` + `thinking: "low"`; substantive investigation: flash + `"medium"`; lanes that apply judgment or verdicts omit both and inherit pi's default glm-5.3 at max — pin at spawn, never mid-session; never pin flash bare: a model-only pin inherits the global `max` (settings `defaultThinkingLevel`)), `deadlineSec` (an explicit leash — it holds even after this session exits), `tools` (code lanes: `"read,grep,find,ls,bash"` — read-only is enforced by the brief, never the tool list; omitted `tools` is already read-only; a lane reaching MCP/web tools must name a route here — `codemode` or `tool_search`, e.g. `"read,grep,find,ls,codemode"` — `mcp__server__*` entries alone reach only direct-exposure servers), `mcp: false` for lanes that skip web/MCP entirely (dispatch rejects a lane leaving MCP enabled without a route — the default lane is offline either way), `noExtensions: true` for lanes that must not see MCP at all. The call returns immediately and the dispatcher stays free. Keep concurrent default-model lanes ≤ 3; batch the rest or pin flash. The caller bounds the wave — every lane in the call is spawned.
-3. **Check** with `lanes`: `action: "wait"` holds the call open until every lane is settled/failed or `waitSec` (default 300) passes — the replacement for sleep-then-poll; `action: "status"` is the instant snapshot: state and cause, turns, usage, `stopReason`, `lastEventAgeSec`, and the per-lane `[model think:level]` tag — read it back; it shows what the lane actually runs. `failed` decomposes into spawn/killed/deadline/crashed (an `.err` tail is attached when the cause is unknown); truncation is caught by `stopReason` and the collect `[SUSPECT]` flag — a suspect artifact is not done. `lastEventAgeSec` well past the lane's normal turn latency = hung → `kill` and redispatch with a refined brief. Rate-limited provider → run lanes sequentially.
-4. **Long lanes** need no special ceremony: dispatch, then `wait` (call it again for runs longer than `waitSec`) or check from later turns — or from a later session, which re-adopts the wave from its manifest. Never delete `.pi/work` while a leash can still be running; the manifest is the only re-adopt record.
-5. **Consume, then clean**: `lanes` `action: "collect"` → read the artifacts to judge them (do not paste them back into the conversation), then delete artifacts, briefs, events, and manifests — `.pi/work/` stays ephemeral.
-
-
-# Workflow Habits
-
-- For big refactors or risky changes, stress-test the plan first (grilling / grill-me skills).
+- Dispatch when a sub-task deserves its own context: an independent review, read-only exploration before implementing, parallel investigation lanes, verification of a risky change. Parallel research is the one blessed parallel pattern.
+- Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf.
+- Tier with the job; pin model + thinking together at spawn, never mid-session: fast model + low thinking for mechanical recon, fast + medium for substantive investigation; judgment/verdict lanes run unpinned on the default model. Never pin the fast model bare — a model-only pin inherits the global default thinking level. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
+- Never delete `.pi/work` while a leash can still be running — the manifest is the only re-adopt record. Otherwise consume, then clean: collect artifacts, judge them, delete briefs, events, and manifests — `.pi/work/` stays ephemeral.
 ```
 
 `~/.pi/agent/APPEND_SYSTEM.md`:

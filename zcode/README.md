@@ -182,30 +182,18 @@ After all MCP entries are added, the `"mcp"` object should look like:
 
 ## 9. Add MCP usage guidance to AGENTS.md
 
-ZCode reads `~/.zcode/AGENTS.md` as user-level instructions in every workspace, injected before the repo's own `AGENTS.md` (so a repo can narrow it). Add tool guidance so agents know when to use each MCP server, the order to prefer tools, and the workflow habits to follow:
+ZCode reads `~/.zcode/AGENTS.md` as user-level instructions in every workspace, injected before the repo's own `AGENTS.md` (so a repo can narrow it). Add routing policy — MCP-over-CLI precedence and tool selection order; tool declarations self-describe the rest:
 
 ```markdown
-## MCP Tool Guidance
+## Tool Guidance
 
-- **GitHub (`mcp__gh__*`):** Use for GitHub operations — listing/searching issues, PRs, repos, commits, code; reading PR diffs/files/reviews; checking CI status and logs. Prefer `mcp__gh__*` tools over raw `gh` CLI commands. Read-only mode is enabled.
-- **GitHub Code Search (`mcp__gh_grep__*`):** Use to find real-world code examples across public GitHub repositories. Great for unfamiliar APIs, usage patterns, and implementation examples.
-- **W&B (`mcp__wandb__*`):** Weights & Biases observability — runs, metrics, artifacts, Weave traces, evaluations, reports. Server disabled by default — enable on demand (step 4).
-- **Context7 (`mcp__context7__*`):** Use to search up-to-date library documentation. Use `resolve-library-id` to find a library, then `query-docs` to fetch its docs.
-- **Hugging Face (`mcp__hf__*`):** Use for Hub lookups — searching models, datasets, and Spaces, repo details, trending listings, and HF docs/papers.
-- **WebSearch (built-in):** Use for current information and external research when library docs and local sources don't suffice.
+MCP tools (`mcp__*`) self-describe — read declarations before calling — and take priority over raw CLI. WebSearch (built-in) covers current information when local sources and library docs don't suffice.
 
 ### Tool selection order
 
-1. Library/dependency internals → check `~/gitlocal/<name>` before any network search.
-2. Library documentation → `context7`.
-3. Real-world usage examples → `gh_grep`.
-4. GitHub issues/PRs/CI → `gh`.
-5. Hugging Face Hub (models, datasets, Spaces, papers) → `hf`.
-6. Everything else current/external → WebSearch / WebFetch.
-
-## Workflow Habits
-
-- For big refactors or risky changes, stress-test the plan first (the `grilling`/`grill-me` skills exist for this).
+1. Library docs → `context7`; usage examples → `gh_grep`.
+2. GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`; W&B → `wandb`.
+3. Everything else current/external → WebSearch / WebFetch.
 ```
 
 ## 10. Install mattpocock skills (grill-me, grilling)

@@ -258,48 +258,20 @@ After all MCP entries are added, the `"mcp"` block should look like:
 
 ## 11. Add MCP usage guidance to AGENTS.md
 
-Add tool guidance to `~/.config/opencode/AGENTS.md` so agents know when to use each MCP server, the order to prefer tools, and the workflow habits to follow:
+Add routing policy to `~/.config/opencode/AGENTS.md` — MCP-over-CLI precedence, agent delegation, and tool selection order; tool declarations and the preset config self-describe the rest:
 
 ```markdown
-## MCP Tool Guidance
+## Tool Guidance
 
-- **GitHub (`gh_*`):** Use for GitHub operations — listing/searching issues, PRs, repos, commits, code; reading PR diffs/files/reviews; checking CI status and logs. Prefer `gh_*` tools over raw `gh` CLI commands.
-- **GitHub Code Search (`gh_grep_*`):** Use to find real-world code examples across public GitHub repositories. Great for unfamiliar APIs, usage patterns, and implementation examples.
-- **W&B (`wandb_*`):** Use for Weights & Biases observability — querying runs, metrics, artifacts, Weave traces, and evaluations.
-- **Websearch (built-in tool):** Use for current information, library docs, and external research.
-- **Context7 (`context7_*`):** Use to search up-to-date library documentation. Use `context7_resolve-library-id` to find a library, then `context7_query-docs` to fetch its docs. Librarian owns context7 — other agents delegate docs lookups to @librarian.
-- **Hugging Face (`hf_*`):** Use for Hub lookups — searching models, datasets, and Spaces (`hf_fs`, `hub_repo_search`), repo details, trending listings, and HF docs/papers. Deeper Hub research routes through @librarian.
+MCP tools self-describe — read declarations before calling. Prefer MCP tools over raw CLI: GitHub operations via `gh_*`, code search via `gh_grep_*`, W&B via `wandb_*`, Hub lookups via `hf_*`. @librarian owns context7 and deeper Hub research — other agents delegate docs lookups to it.
 
 ### Tool selection order
 
-1. Library/dependency internals → check `~/gitlocal/<name>` before any network search.
-2. Library documentation → `context7` (via @librarian).
-3. Real-world usage examples → `gh_grep`.
-4. GitHub issues/PRs/CI → `gh`.
-5. Hugging Face Hub (models, datasets, Spaces, papers) → `hf`.
-6. Everything else current/external → websearch / webfetch.
-
-### Agent MCP Access
-
-Which MCP tools each agent role has (configured in oh-my-opencode-slim.json):
-
-| Agent | gh | wandb | gh_grep | context7 | hf |
-|---|---|---|---|---|---|
-| orchestrator | ✅ | ✅ | ✅ | — | ✅ |
-| oracle | ✅ | — | — | — | — |
-| librarian | ✅ | ✅ | ✅ | ✅ | ✅ |
-| explorer | ✅ | ✅ | — | — | — |
-| designer | — | — | — | — | — |
-| fixer | — | — | — | — | — |
-| councillor | — | — | — | — | — |
-
-✅ = available &nbsp; — = not available
-
-Websearch is a built-in tool, allowed for every agent by default (restrict with `permission`).
-
-## Workflow Habits
-
-- For big refactors or risky changes, stress-test the plan first (the `grilling`/`grill-me` skills exist for this).
+1. Local codebase → `rg`/`fd` first, then read.
+2. Library/dependency internals → `~/gitlocal/<name>` before any network search (machine profile owns the rule).
+3. Library docs → `context7` (via @librarian); usage examples → `gh_grep`.
+4. GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`; W&B → `wandb`.
+5. Everything else current/external → websearch / webfetch.
 ```
 
 ## 12. Install mattpocock skills (grill-me, grilling)
