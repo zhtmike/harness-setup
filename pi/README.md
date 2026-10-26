@@ -337,7 +337,7 @@ pi has no sub-agents by design; dispatch spawns fresh pi instances as independen
 
 - Dispatch when a sub-task deserves its own context: an independent review, read-only exploration before implementing, parallel investigation lanes, verification of a risky change. Parallel research is the one blessed parallel pattern.
 - Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf.
-- Tier with the job; pin model + thinking together at spawn, never mid-session: fast model + low thinking for mechanical recon, fast + medium for substantive investigation; judgment/verdict lanes run unpinned on the default model. Never pin the fast model bare — a model-only pin inherits the global default thinking level. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
+- Tier with the job; pin model + thinking together at spawn, never mid-session: fast model (settings' `enabledModels` carries the fast tier) + low thinking for mechanical recon, fast + medium for substantive investigation; judgment/verdict lanes run unpinned on the default model. Never pin the fast model bare — a model-only pin inherits the global default thinking level. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
 - Never delete `.pi/work` while a leash can still be running — the manifest is the only re-adopt record. Otherwise consume, then clean: collect artifacts, judge them, delete briefs, events, and manifests — `.pi/work/` stays ephemeral.
 ```
 
