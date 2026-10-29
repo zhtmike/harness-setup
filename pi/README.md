@@ -113,13 +113,13 @@ wandb login             # or export WANDB_API_KEY="…"   (wandb.ai/authorize)
 hf auth login           # or export HF_TOKEN="…"        (huggingface.co/settings/tokens)
 ```
 
-> `gh auth login`'s keyring credential is an OAuth token with account-wide scopes — the machine's write credential, working where organizations block classic PATs. Keep it on personal single-user machines only: shared servers and cluster nodes top out at read-only GitHub credentials (`GH_TOKEN` with a read-only fine-grained PAT where gh is needed there).
+> `gh auth login`'s keyring credential is an OAuth token with account-wide scopes — the machine's write credential, working where organizations block classic PATs. Keep it on personal single-user machines only. Where shared servers and cluster nodes need gh, give it a read-only ceiling instead: `export GH_TOKEN=<YOUR_READONLY_PAT>` with a fine-grained PAT in the same read-only shape as step 5's — reads work, writes fail at the credential.
 
 > The `wandb` CLI cannot query runs — use the `wandb` MCP (step 6) or REST API with curl. Web/docs: `websearch` MCP (step 8) or curl.
 
 ## 5. Add GitHub MCP
 
-Create a [fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) with repository access **All repositories** and Contents, Issues, and Pull requests all set **Read-only** (private repos readable too), then add the env var.
+Create a [fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) with repository access **All repositories** and Contents, Issues, Pull requests, and Actions all set **Read-only** (private repos readable too), then add the env var.
 
 Add to your shell rc file (`~/.zshrc` on macOS, `~/.bashrc` on Linux):
 
