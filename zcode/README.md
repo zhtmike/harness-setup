@@ -35,7 +35,7 @@ Configure MCPs in **Settings → MCP** (form mode, full-config paste, one-click 
 
 ## 3. Add GitHub MCP
 
-Create a [fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) with repository access **Public repositories (read-only)** — no permission checkboxes needed — then add to `mcp.servers` in `~/.zcode/cli/config.json` (paste the literal token — see the step 2 note on `{env:VAR}`):
+Create a [fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) with repository access **All repositories** and Contents, Issues, and Pull requests all set **Read-only** (private repos readable too), then add to `mcp.servers` in `~/.zcode/cli/config.json` (paste the literal token — see the step 2 note on `{env:VAR}`):
 
 ```jsonc
 "gh": {

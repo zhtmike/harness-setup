@@ -119,7 +119,7 @@ hf auth login           # or export HF_TOKEN="…"        (huggingface.co/settin
 
 ## 5. Add GitHub MCP
 
-Create a [fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) with repository access **Public repositories (read-only)** — no permission checkboxes needed — then add the env var.
+Create a [fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) with repository access **All repositories** and Contents, Issues, and Pull requests all set **Read-only** (private repos readable too), then add the env var.
 
 Add to your shell rc file (`~/.zshrc` on macOS, `~/.bashrc` on Linux):
 

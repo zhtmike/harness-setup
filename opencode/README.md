@@ -66,7 +66,7 @@ All MCP servers live under `"mcp"."servers"` in `~/.config/opencode/opencode.jso
 
 ## 5. Add GitHub MCP
 
-Create a [fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) with repository access **Public repositories (read-only)** — no permission checkboxes needed — then:
+Create a [fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) with repository access **All repositories** and Contents, Issues, and Pull requests all set **Read-only** (private repos readable too), then:
 
 Add to your shell rc file (`~/.zshrc` on macOS, `~/.bashrc` on Linux):
 
