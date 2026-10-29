@@ -108,16 +108,18 @@ conda install -c conda-forge wandb huggingface_hub            # fallback: pip in
 Login each CLI (env vars are the non-interactive equivalent — enough to put the exports in `~/.zshrc`):
 
 ```bash
-gh auth login           # or export GH_TOKEN="…"       (github.com/settings/tokens)
+gh auth login           # or export GH_TOKEN="…"       (classic public_repo PAT — github.com/settings/tokens/new)
 wandb login             # or export WANDB_API_KEY="…"   (wandb.ai/authorize)
 hf auth login           # or export HF_TOKEN="…"        (huggingface.co/settings/tokens)
 ```
+
+> `gh auth login` demands full `repo` scopes. A least-privilege write credential — classic PAT, `public_repo` scope, enough for PR create/merge and review posts on public repos — cannot pass that check; export it as `GH_TOKEN` instead (the env var outranks stored credentials). Keep it on personal single-user machines only: shared servers and cluster nodes top out at read-only GitHub credentials.
 
 > The `wandb` CLI cannot query runs — use the `wandb` MCP (step 6) or REST API with curl. Web/docs: `websearch` MCP (step 8) or curl.
 
 ## 5. Add GitHub MCP
 
-Create a [GitHub Personal Access Token](https://github.com/settings/personal-access-tokens/new) with `repo`, `read:org`, and `workflow` scopes, then add the env var.
+Create a [fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) with repository access **Public repositories (read-only)** — no permission checkboxes needed — then add the env var.
 
 Add to your shell rc file (`~/.zshrc` on macOS, `~/.bashrc` on Linux):
 
@@ -372,7 +374,7 @@ Inside pi:
 
 1. `/model` → zai/glm-5.3; `Shift+Tab` → max; `Ctrl+S` to save.
 2. `/mcp` → all six servers connected (or `pi mcp list` from the shell); `pi list` → `npm:pi-minimal-dispatch` installed (dispatch/lanes tools load).
-3. "Run `gh auth status`" → authenticated. Same for `hf auth whoami` and `wandb status`.
+3. "Run `gh auth status`" → authenticated — riding `GH_TOKEN` with `Token scopes: 'public_repo'` when the least-privilege route is used. Same for `hf auth whoami` and `wandb status`.
 4. "List your skills" → grilling, code-review, coding-style, spike, propose, commit-gate, survey, self-learn (grill-me is installed but hidden by design — `disable-model-invocation`).
 5. Smoke test: `/skill:survey <small topic>` → investigation lanes dispatched per the Dispatch section, one synthesized answer; "review this diff" → a single dispatched reviewer.
 6. "grill me on plan X" → grilling skill triggers.
