@@ -258,7 +258,7 @@ After all MCP entries are added, the `"mcp"` block should look like:
 
 ## 11. Add MCP usage guidance to AGENTS.md
 
-Add routing policy to `~/.config/opencode/AGENTS.md` — MCP-over-CLI precedence, agent delegation, and tool selection order; tool declarations and the preset config self-describe the rest:
+Add routing policy and session workflow to `~/.config/opencode/AGENTS.md` — MCP-over-CLI precedence, agent delegation, tool selection order, and stage-flow discipline; tool declarations and the preset config self-describe the rest:
 
 ```markdown
 ## Tool Guidance
@@ -272,6 +272,13 @@ MCP tools self-describe — read declarations before calling — and take priori
 3. Library docs → `context7` (via @librarian); usage examples → `gh_grep`.
 4. GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`; W&B → `wandb`.
 5. Everything else current/external → websearch / webfetch.
+
+## Workflow
+
+- Context gathering: separate read-only exploration → artifact file → implementation in a fresh session that reads the artifact (never parallel implementers).
+- Stage flow: one task proceeds through its stages — investigate, design, prove, finish, gate the commit — without asking to continue between stages; the asks are design acceptance, external actions, and genuine unresolvable ambiguity. A context-gathering artifact handoff is a stage boundary, not a stop — the fresh session resumes without asking.
+- Stage completion is not task wind-down: wind down only when the task is settled — delivered and verified, nothing pending on the session — or when the session ends with it unmet.
+- A session ends with its loops closed: every open item is done, blocked with the blocker named, or handed to the user as a decision — agent deferral without a blocker is not a finish.
 ```
 
 ## 12. Install mattpocock skills (grill-me, grilling)
