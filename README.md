@@ -10,7 +10,6 @@ The guides share a deliberate spine (install → providers → MCP servers → A
 |---|---|
 | `pi` | [pi/README.md](pi/README.md) |
 | `opencode` | [opencode/README.md](opencode/README.md) |
-| `zcode` | [zcode/README.md](zcode/README.md) |
 
 ## Machine profiles
 

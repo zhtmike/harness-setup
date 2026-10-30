@@ -10,8 +10,6 @@ pi and OpenCode read `AGENTS.md` from the working directory's ancestors (pi up t
 ln -sfn ~/gitlocal/harness-setup/machines/macbook.md ~/AGENTS.md
 ```
 
-ZCode reads only `~/.zcode/AGENTS.md` (user global) and the current workspace's `AGENTS.md` — no ancestors, no merging — so paste the `## Environment Constraints` block from macbook.md into `~/.zcode/AGENTS.md` after the harness guidance, and re-paste when the payload changes.
-
 Non-default local state (default values are never recorded):
 
 - pi `~/.pi/agent/settings.json` carries `hideThinkingBlock: true` beyond the guide payload (default `false`).
