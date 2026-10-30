@@ -57,7 +57,6 @@ mkdir -p ~/.pi/agent
 
 ```json
 {
-  "$schema": "https://pi.dev/schemas/settings.schema.json",
   "defaultProvider": "zai",
   "defaultModel": "glm-5.3",
   "defaultThinkingLevel": "max",
