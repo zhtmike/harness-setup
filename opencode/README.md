@@ -350,6 +350,8 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 
 ## Workflow
 
+Duties: plan, implement, verify. One session, one coherent change.
+
 - Context gathering: delegate to read-only subagents — @librarian for docs and research, @explorer for repo recon, @oracle for verdicts — findings return to the session's own context, no artifact file, no fresh session; parallel research is fine, implementation keeps one writer.
 - Stage flow: one task proceeds through its stages — investigate, design, prove, finish, gate the commit — without asking to continue between stages; the asks are design acceptance, external actions, and genuine unresolvable ambiguity. A subagent returning its findings is a stage boundary, not a stop — the session continues without asking.
 - Stage completion is not task wind-down: wind down only when the task is settled — delivered and verified, nothing pending on the session — or when the session ends with it unmet.
