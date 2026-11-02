@@ -58,7 +58,7 @@ opencode models
 npx oh-my-opencode-slim@latest install
 ```
 
-This generates `opencode.json` (or `opencode.jsonc` if one already exists), `tui.json`, and `oh-my-opencode-slim.json` with stock presets. Replace `~/.config/opencode/oh-my-opencode-slim.json` with the customized version below (step 14).
+This generates `opencode.json` (or `opencode.jsonc` if one already exists), `tui.json`, and `oh-my-opencode-slim.json` with stock presets. Replace `~/.config/opencode/oh-my-opencode-slim.json` with the customized version below (step 13).
 
 oh-my-opencode-slim auto-provides **context7** and **gh_grep** — add them to `opencode.jsonc` only for API-key auth (context7) or visibility (gh_grep). **Websearch** is an OpenCode built-in tool (step 8); the **Z.AI plan MCPs** (step 8), **gh**, **wandb**, and **hf** always need explicit config.
 
@@ -354,17 +354,7 @@ MCP tools self-describe — read declarations before calling — and take priori
 - A session ends with its loops closed: every open item is done, blocked with the blocker named, or handed to the user as a decision — agent deferral without a blocker is not a finish.
 ```
 
-## 12. Install mattpocock skills (grill-me, grilling)
-
-> Requires Node.js ≥ 22. If needed: `brew install node` or `nvm install node` (see https://github.com/nvm-sh/nvm).
-
-```bash
-npx skills@latest add mattpocock/skills --yes --global --skill "grill-me" --skill "grilling"
-```
-
-> https://github.com/mattpocock/skills
-
-## 13. Install personal skills (zhtmike/skills)
+## 12. Install personal skills (zhtmike/skills)
 
 ```bash
 mkdir -p ~/gitlocal ~/.config/opencode/skills
@@ -381,7 +371,7 @@ ln -sfn ~/gitlocal/skills/self-learn ~/.config/opencode/skills/self-learn
 
 > Symlinks keep a single source of truth: `git pull` in `~/gitlocal/skills` updates both skills everywhere. https://github.com/zhtmike/skills
 
-## 14. Apply the customized presets
+## 13. Apply the customized presets
 
 Replace `~/.config/opencode/oh-my-opencode-slim.json`:
 
@@ -415,7 +405,7 @@ Replace `~/.config/opencode/oh-my-opencode-slim.json`:
 >
 > `variant` is the model's reasoning effort, and GLM-5.3 / DeepSeek expose exactly `low` / `high` / `max` — there is no `medium`. Variants tier with the job, main session stays `max`: `low` for lookup/recon (librarian, explorer), `high` for substantive-but-bounded work (designer, fixer), `max` for judgment (orchestrator, oracle). omo-slim's preset editor clears a variant the newly picked model doesn't expose — after re-picking models, re-check these values.
 
-## 15. Verify
+## 14. Verify
 
 ```bash
 source ~/.zshrc   # or ~/.bashrc on Linux

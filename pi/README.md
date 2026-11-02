@@ -70,12 +70,6 @@ mkdir -p ~/.pi/agent
 
 ## 3. Install skills
 
-```bash
-npx skills@latest add mattpocock/skills --yes --global -a pi --skill "grill-me" --skill "grilling"
-```
-
-> https://github.com/mattpocock/skills
-
 Personal skills (zhtmike/skills):
 
 ```bash
@@ -433,9 +427,8 @@ Inside pi:
 1. `/model` → zai/glm-5.3; `Shift+Tab` → max; `Ctrl+S` to save.
 2. `/mcp` → all nine servers connected (or `pi mcp list` from the shell); `pi list` → `npm:pi-minimal-dispatch` installed (dispatch/lanes tools load).
 3. "Run `gh auth status`" → authenticated — keyring with `Token scopes: 'repo, …'` (env-token setups show their own scopes). Same for `hf auth whoami` and `wandb status`.
-4. "List your skills" → grilling, code-review, coding-style, spike, propose, commit-gate, conversation-gate, survey, self-learn (grill-me is installed but hidden by design — `disable-model-invocation`).
+4. "List your skills" → code-review, coding-style, spike, propose, commit-gate, conversation-gate, survey, self-learn.
 5. Smoke test: `/skill:survey <small topic>` → investigation lanes dispatched per the Dispatch section, one synthesized answer; "review this diff" → a single dispatched reviewer.
-6. "grill me on plan X" → grilling skill triggers.
 
 > Daily: `Ctrl+L` model picker (`Ctrl+P` cycles), `Shift+Tab` thinking, `pi -c` continue, `pi -r` resume, `pi --print "task"` one-shot, `pi --no-mcp --tools read,grep,find,ls` read-only (MCP-free), `!cmd` shell, `/tree` edit earlier message, `/reload` after config changes.
 > TUI: fullscreen is the default (`"tuiMode": "regular"` reverts); `"theme"` in settings.json (default `system`; custom themes in `~/.pi/agent/themes/`); keybindings in `~/.pi/agent/keybindings.json` (`/hotkeys` lists current).
@@ -446,4 +439,4 @@ Inside pi:
 
 - [pi](https://github.com/earendil-works/pi) — [Docs](https://pi.dev/docs/latest)
 - [Author's design article](https://mariozechner.at/posts/2025-11-30-pi-coding-agent/)
-- [Skills](https://github.com/mattpocock/skills) · [zhtmike/skills](https://github.com/zhtmike/skills)
+- [Skills](https://github.com/zhtmike/skills)
