@@ -60,7 +60,7 @@ npx oh-my-opencode-slim@latest install
 
 This generates `opencode.json` (or `opencode.jsonc` if one already exists), `tui.json`, and `oh-my-opencode-slim.json` with stock presets. Replace `~/.config/opencode/oh-my-opencode-slim.json` with the customized version below (step 14).
 
-oh-my-opencode-slim auto-provides **context7** and **gh_grep** — add them to `opencode.jsonc` only for API-key auth (context7) or visibility (gh_grep). **Websearch** is an OpenCode built-in tool (step 8); **gh**, **wandb**, and **hf** always need explicit config.
+oh-my-opencode-slim auto-provides **context7** and **gh_grep** — add them to `opencode.jsonc` only for API-key auth (context7) or visibility (gh_grep). **Websearch** is an OpenCode built-in tool (step 8); the **Z.AI plan MCPs** (step 8), **gh**, **wandb**, and **hf** always need explicit config.
 
 All MCP servers live under `"mcp"."servers"` in `~/.config/opencode/opencode.json` (or `opencode.jsonc` — either works; the steps below say `opencode.jsonc` for brevity). Each step shows just the inner server entry; a complete merged example is shown at the end of step 10. v2 routes MCP tools through Code Mode by default — the entries here set `"codemode": false` to register tools directly, which the step-11 guidance and the agent `mcps` grants are written against.
 
@@ -148,7 +148,7 @@ Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
 
 > https://github.com/upstash/context7
 
-## 8. Websearch (built-in, no MCP)
+## 8. Websearch (built-in) & Z.AI Plan MCPs
 
 Websearch is an OpenCode built-in tool, enabled by default — no MCP entry. Providers: Exa, Firecrawl, Parallel, Tavily, TinyFish — to use Exa, export its key in your shell rc file (`~/.zshrc` on macOS, `~/.bashrc` on Linux):
 
@@ -157,6 +157,49 @@ export EXA_API_KEY="your-exa-key"
 ```
 
 The first search asks for permission and a provider choice. Restrict it per agent with the `websearch` permission action.
+
+The Z.AI Coding Plan (step 3) bundles three remote MCPs — no extra keys, but their headers read the key from the environment, so export it (same pattern as step 5); calls bill against the plan quota:
+
+```bash
+export ZAI_API_KEY="your-zai-coding-plan-key"
+```
+
+Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
+
+```jsonc
+"zai_search": {
+  "type": "remote",
+  "url": "https://api.z.ai/api/mcp/web_search_prime/mcp",
+  "oauth": false,
+  "codemode": false,
+  "headers": {
+    "Authorization": "Bearer {env:ZAI_API_KEY}",
+    "Accept": "application/json, text/event-stream"
+  }
+},
+"zai_reader": {
+  "type": "remote",
+  "url": "https://api.z.ai/api/mcp/web_reader/mcp",
+  "oauth": false,
+  "codemode": false,
+  "headers": {
+    "Authorization": "Bearer {env:ZAI_API_KEY}",
+    "Accept": "application/json, text/event-stream"
+  }
+},
+"zread": {
+  "type": "remote",
+  "url": "https://api.z.ai/api/mcp/zread/mcp",
+  "oauth": false,
+  "codemode": false,
+  "headers": {
+    "Authorization": "Bearer {env:ZAI_API_KEY}",
+    "Accept": "application/json, text/event-stream"
+  }
+}
+```
+
+> https://docs.bigmodel.cn/cn/coding-plan/mcp/search-mcp-server (mainland accounts: host is `open.bigmodel.cn`). The `Accept` header is required — omitting it returns HTTP 400. These endpoints rate-limit per account (`1302`/HTTP 429) independently of the quota windows — single lookups, not parallel fan-out.
 
 ## 9. Add GitHub Code Search MCP
 
@@ -237,6 +280,36 @@ After all MCP entries are added, the `"mcp"` block should look like:
         "Accept": "application/json, text/event-stream"
       }
     },
+    "zai_search": {
+      "type": "remote",
+      "url": "https://api.z.ai/api/mcp/web_search_prime/mcp",
+      "oauth": false,
+      "codemode": false,
+      "headers": {
+        "Authorization": "Bearer {env:ZAI_API_KEY}",
+        "Accept": "application/json, text/event-stream"
+      }
+    },
+    "zai_reader": {
+      "type": "remote",
+      "url": "https://api.z.ai/api/mcp/web_reader/mcp",
+      "oauth": false,
+      "codemode": false,
+      "headers": {
+        "Authorization": "Bearer {env:ZAI_API_KEY}",
+        "Accept": "application/json, text/event-stream"
+      }
+    },
+    "zread": {
+      "type": "remote",
+      "url": "https://api.z.ai/api/mcp/zread/mcp",
+      "oauth": false,
+      "codemode": false,
+      "headers": {
+        "Authorization": "Bearer {env:ZAI_API_KEY}",
+        "Accept": "application/json, text/event-stream"
+      }
+    },
     "gh_grep": {
       "type": "remote",
       "url": "https://mcp.grep.app",
@@ -268,10 +341,10 @@ MCP tools self-describe — read declarations before calling — and take priori
 ### Tool selection order
 
 1. Local codebase → `rg`/`fd` first, then read.
-2. Library/dependency internals → `~/gitlocal/<name>` before any network search (machine profile owns the rule).
+2. Library/dependency internals → `~/gitlocal/<name>` before any network search (machine profile owns the rule); uncloned → `zread`, else `gh`.
 3. Library docs → `context7` (via @librarian); usage examples → `gh_grep`.
 4. GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`; W&B → `wandb`.
-5. Everything else current/external → websearch / webfetch.
+5. Everything else current/external → websearch / webfetch; `zai_search` / `zai_reader` for single lookups and CN sources.
 
 ## Workflow
 

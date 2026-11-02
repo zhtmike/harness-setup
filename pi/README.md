@@ -189,7 +189,7 @@ export CONTEXT7_API_KEY="your-context7-key"
 
 > https://github.com/upstash/context7
 
-## 8. Add Websearch MCP
+## 8. Add Websearch & Z.AI Plan MCPs
 
 Get your key at [exa.ai](https://exa.ai), then add the env var (same pattern as step 5):
 
@@ -209,6 +209,37 @@ export EXA_API_KEY="your-exa-key"
 
 > https://exa.ai
 > More tools via URL parameter: `?tools=web_search_exa,web_fetch_exa,web_search_advanced_exa` (advanced adds domain/date filters; `agent_run` multi-step research requires auth). OAuth sign-in is also supported: `https://mcp.exa.ai/mcp?login`.
+
+The Z.AI Coding Plan (step 2) bundles three remote MCPs — no extra keys, they reuse `${ZAI_API_KEY}`, but calls bill against the plan quota:
+
+```json
+"zai_search": {
+  "url": "https://api.z.ai/api/mcp/web_search_prime/mcp",
+  "headers": {
+    "Authorization": "Bearer ${ZAI_API_KEY}",
+    "Accept": "application/json, text/event-stream"
+  },
+  "description": "Z.AI web search — current info, CN/regional sources, domain/recency filters"
+},
+"zai_reader": {
+  "url": "https://api.z.ai/api/mcp/web_reader/mcp",
+  "headers": {
+    "Authorization": "Bearer ${ZAI_API_KEY}",
+    "Accept": "application/json, text/event-stream"
+  },
+  "description": "Z.AI web reader — fetch a URL as clean markdown"
+},
+"zread": {
+  "url": "https://api.z.ai/api/mcp/zread/mcp",
+  "headers": {
+    "Authorization": "Bearer ${ZAI_API_KEY}",
+    "Accept": "application/json, text/event-stream"
+  },
+  "description": "ZRead — GitHub repo tree, file reader, and repo docs"
+}
+```
+
+> https://docs.bigmodel.cn/cn/coding-plan/mcp/search-mcp-server (mainland accounts: host is `open.bigmodel.cn`). The `Accept` header is required — omitting it returns HTTP 400. These endpoints rate-limit per account (`1302`/HTTP 429) independently of the quota windows: single lookups only — parallel `survey` fan-out stays on `websearch`.
 
 ## 9. Add GitHub Code Search MCP
 
@@ -279,6 +310,30 @@ After all MCP entries are added, `~/.pi/agent/mcp.json` should look like:
       },
       "description": "Web search and docs research (Exa)"
     },
+    "zai_search": {
+      "url": "https://api.z.ai/api/mcp/web_search_prime/mcp",
+      "headers": {
+        "Authorization": "Bearer ${ZAI_API_KEY}",
+        "Accept": "application/json, text/event-stream"
+      },
+      "description": "Z.AI web search — current info, CN/regional sources, domain/recency filters"
+    },
+    "zai_reader": {
+      "url": "https://api.z.ai/api/mcp/web_reader/mcp",
+      "headers": {
+        "Authorization": "Bearer ${ZAI_API_KEY}",
+        "Accept": "application/json, text/event-stream"
+      },
+      "description": "Z.AI web reader — fetch a URL as clean markdown"
+    },
+    "zread": {
+      "url": "https://api.z.ai/api/mcp/zread/mcp",
+      "headers": {
+        "Authorization": "Bearer ${ZAI_API_KEY}",
+        "Accept": "application/json, text/event-stream"
+      },
+      "description": "ZRead — GitHub repo tree, file reader, and repo docs"
+    },
     "gh_grep": {
       "url": "https://mcp.grep.app",
       "description": "GitHub Code Search — real-world code examples across public repositories"
@@ -297,7 +352,7 @@ After all MCP entries are added, `~/.pi/agent/mcp.json` should look like:
 > Header and env values expand `${VAR}`. `sse` entries are rejected; SSE-only servers usually expose streamable HTTP at `/mcp`. OAuth servers need no credentials: put the URL in, then `/mcp login <server>`.
 > Manage from the shell: `pi mcp add|remove|list|login|logout`; `/mcp` in-session; `/reload` after edits; logs in `~/.pi/agent/mcp.log`.
 
-Verify all six connect (exits 1 unless every enabled server connects):
+Verify all nine connect (exits 1 unless every enabled server connects):
 
 ```bash
 source ~/.zshrc && pi mcp list
@@ -305,7 +360,7 @@ source ~/.zshrc && pi mcp list
 
 ## 11. Codemode
 
-MCP, `tool_search`, and codemode are built in. The servers above use the default `codemode` exposure, which activates codemode automatically — no settings entry required (disable with `autoEnableCodemode: false` in `mcp.json`). Tools never enter context; servers appear as one-liners in an `mcp_servers` system-prompt section (fed by the `description` field). Opt a server into `deferred` to get `tool_search` (loaded tools stay declared on that transcript branch); `direct` declares all ~79 tool schemas in every request; `hidden` registers but blocks access. Promote a single hot tool to direct calls with `toolExposure` (a per-server key in `mcp.json`). MCP connections never bust the prompt cache, but each newly declared tool re-bills the prefix once (tool schemas precede messages).
+MCP, `tool_search`, and codemode are built in. The servers above use the default `codemode` exposure, which activates codemode automatically — no settings entry required (disable with `autoEnableCodemode: false` in `mcp.json`). Tools never enter context; servers appear as one-liners in an `mcp_servers` system-prompt section (fed by the `description` field). Opt a server into `deferred` to get `tool_search` (loaded tools stay declared on that transcript branch); `direct` declares all ~84 tool schemas in every request; `hidden` registers but blocks access. Promote a single hot tool to direct calls with `toolExposure` (a per-server key in `mcp.json`). MCP connections never bust the prompt cache, but each newly declared tool re-bills the prefix once (tool schemas precede messages).
 > Codemode runs one model-written JavaScript script (QuickJS sandbox — no fs/network, tools only) whose parallel calls and filtered output are all that reach the context: inside scripts, bash holds up to 1 MiB and MCP results arrive untruncated (direct calls: 50 KB / 20 KB middle-elided). Scripts reach every server's tools via `searchTools()` / `describeNamespace()`.
 > Keep `codemode.mode` at the default `"on"` — direct tool calls stay available; scripts are an extra lane for fan-out. `"only"` hides all other tools — avoid with glm-5.3. `codemode.inlineBudget` (default 3000) caps tool declarations in the codemode description.
 
@@ -329,9 +384,9 @@ MCP tool declarations self-describe — read them before calling (`describeTool`
 ## Tool selection order
 
 1. Local codebase → `rg`/`fd` first, then read; `ast-grep` for structural queries.
-2. Library/dependency internals → `~/gitlocal/<name>` before any network search (machine profile owns the rule).
+2. Library/dependency internals → `~/gitlocal/<name>` before any network search (machine profile owns the rule); uncloned → `zread`, else `gh`.
 3. Library docs → `context7`; usage examples → `gh_grep`; GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`; W&B → `wandb`.
-4. Everything else current/external → `websearch`; curl via bash as fallback.
+4. Everything else current/external → `websearch` for parallel fan-out, `zai_search`/`zai_reader` for single lookups and CN sources; curl via bash as fallback.
 
 ## Dispatch — sub-tasks via fresh pi instances
 
@@ -376,7 +431,7 @@ source ~/.zshrc && pi
 Inside pi:
 
 1. `/model` → zai/glm-5.3; `Shift+Tab` → max; `Ctrl+S` to save.
-2. `/mcp` → all six servers connected (or `pi mcp list` from the shell); `pi list` → `npm:pi-minimal-dispatch` installed (dispatch/lanes tools load).
+2. `/mcp` → all nine servers connected (or `pi mcp list` from the shell); `pi list` → `npm:pi-minimal-dispatch` installed (dispatch/lanes tools load).
 3. "Run `gh auth status`" → authenticated — keyring with `Token scopes: 'repo, …'` (env-token setups show their own scopes). Same for `hf auth whoami` and `wandb status`.
 4. "List your skills" → grilling, code-review, coding-style, spike, propose, commit-gate, conversation-gate, survey, self-learn (grill-me is installed but hidden by design — `disable-model-invocation`).
 5. Smoke test: `/skill:survey <small topic>` → investigation lanes dispatched per the Dispatch section, one synthesized answer; "review this diff" → a single dispatched reviewer.
