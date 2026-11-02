@@ -356,6 +356,7 @@ source ~/.zshrc && pi mcp list
 
 MCP, `tool_search`, and codemode are built in. The servers above use the default `codemode` exposure, which activates codemode automatically — no settings entry required (disable with `autoEnableCodemode: false` in `mcp.json`). Tools never enter context; servers appear as one-liners in an `mcp_servers` system-prompt section (fed by the `description` field). Opt a server into `deferred` to get `tool_search` (loaded tools stay declared on that transcript branch); `direct` declares all ~84 tool schemas in every request; `hidden` registers but blocks access. Promote a single hot tool to direct calls with `toolExposure` (a per-server key in `mcp.json`). MCP connections never bust the prompt cache, but each newly declared tool re-bills the prefix once (tool schemas precede messages).
 > Codemode runs one model-written JavaScript script (QuickJS sandbox — no fs/network, tools only) whose parallel calls and filtered output are all that reach the context: inside scripts, bash holds up to 1 MiB and MCP results arrive untruncated (direct calls: 50 KB / 20 KB middle-elided). Scripts reach every server's tools via `searchTools()` / `describeNamespace()`.
+> In codemode scripts, MCP results arrive as `{content:[{type,text}]}` envelopes with JSON-string text — join the parts and `JSON.parse`.
 > Keep `codemode.mode` at the default `"on"` — direct tool calls stay available; scripts are an extra lane for fan-out. `"only"` hides all other tools — avoid with glm-5.3. `codemode.inlineBudget` (default 3000) caps tool declarations in the codemode description.
 
 ## 12. Install the dispatch extension
@@ -373,12 +374,14 @@ pi install npm:pi-minimal-dispatch
 ```markdown
 # Tool Guidance
 
-MCP tool declarations self-describe — read them before calling (`describeTool` in codemode), and prefer MCP over raw CLI. In codemode, MCP results are `{content:[{type,text}]}` envelopes with JSON-string text — join the parts and `JSON.parse`.
+MCP tool declarations self-describe — read them before calling (`describeTool` in codemode), and prefer MCP over raw CLI.
+
+When two loaded layers conflict, the nearer-the-work layer's policy wins; a farther layer's machine-capability facts are floors — a nearer layer may tighten them, never loosen; a standing conflict is a defect to fix at its owner.
 
 ## Tool selection order
 
 1. Local codebase → `rg`/`fd` first, then read; `ast-grep` for structural queries.
-2. Library/dependency internals → `~/gitlocal/<name>` before any network search (machine profile owns the rule); uncloned → `zread`, else `gh`.
+2. Library/dependency internals → local-first per the machine profile; uncloned → `zread`, else `gh`.
 3. Library docs → `context7`; usage examples → `gh_grep`; GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`; W&B → `wandb`.
 4. Everything else current/external → `websearch` for parallel fan-out, `zai_search`/`zai_reader` for single lookups and CN sources; curl via bash as fallback.
 
@@ -389,7 +392,7 @@ pi has no sub-agents by design; dispatch spawns independent read-only lanes (the
 - Dispatch when a sub-task deserves its own context: an independent review, read-only exploration before implementing, parallel investigation lanes, verification of a risky change. Parallel research is the one blessed parallel pattern.
 - Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf. Park briefs under your own `.pi/work/s/$PI_SESSION_ID/`: they are written before the wave claim, so bare `.pi/work/` briefs collide across sessions.
 - Tier with the job; pin model + thinking together at spawn, never mid-session: fast model (settings' `enabledModels` carries the fast tier) + low thinking for mechanical recon, fast + medium for substantive investigation; judgment/verdict lanes run unpinned on the default model. Never pin the fast model bare — a model-only pin inherits the global default thinking level. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
-- Never delete `.pi/work` while a leash can still be running — the manifest is the only re-adopt record. Otherwise consume — collect artifacts, judge them — then release the settled wave (`lanes action=release`); a hand-sweep of `.pi/work` is how one session destroys another's. Never signal a wave you didn't dispatch, and a write-capable lane edits only under the dispatcher's claim.
+- Never delete `.pi/work` while a leash can still be running — the manifest is the only re-adopt record. Otherwise consume — collect artifacts, judge them — then release the settled wave (`lanes action=release`); a hand-sweep of `.pi/work` is how one session destroys another's. Never signal a wave you didn't dispatch, and a write-capable lane writes data artifacts only, under the dispatcher's claim.
 ```
 
 `~/.pi/agent/APPEND_SYSTEM.md`:
@@ -413,6 +416,7 @@ Duties: plan, implement, verify. One session, one coherent change.
 ```
 
 > pi loads AGENTS.md from `~/.pi/agent/` + cwd + ancestors (AGENTS.md wins over CLAUDE.md).
+> Trim payloads from contradicted and duplicated lines first — a line naming a concrete observed failure survives a trim; length alone is not the axis.
 
 > The isolation rules exist because concurrent sessions in one repo share `.pi/work` and the checkout: session dirs namespace scratch (the full session id — a uuidv7 prefix is a ~65 s timestamp window that collides for concurrent sessions), `release` is the only wave cleanup, and the OWNER claim keeps one editor per checkout (a second task takes a worktree). Refusals met there are by design — never worked around.
 

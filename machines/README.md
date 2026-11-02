@@ -12,7 +12,7 @@ ln -sfn ~/gitlocal/harness-setup/machines/macbook.md ~/AGENTS.md
 
 Non-default local state (default values are never recorded):
 
-- pi `~/.pi/agent/settings.json` carries `hideThinkingBlock: true` beyond the guide payload (default `false`).
+- pi `~/.pi/agent/settings.json` carries `hideThinkingBlock: true` beyond the guide payload.
 
 ## Support scripts
 

@@ -338,10 +338,12 @@ Add routing policy and session workflow to `~/.config/opencode/AGENTS.md` — MC
 
 MCP tools self-describe — read declarations before calling — and take priority over raw CLI. @librarian owns context7 and deeper Hub research — other agents delegate docs lookups to it.
 
+When two loaded layers conflict, the nearer-the-work layer's policy wins; a farther layer's machine-capability facts are floors — a nearer layer may tighten them, never loosen; a standing conflict is a defect to fix at its owner.
+
 ### Tool selection order
 
 1. Local codebase → `rg`/`fd` first, then read.
-2. Library/dependency internals → `~/gitlocal/<name>` before any network search (machine profile owns the rule); uncloned → `zread`, else `gh`.
+2. Library/dependency internals → local-first per the machine profile; uncloned → `zread`, else `gh`.
 3. Library docs → `context7` (via @librarian); usage examples → `gh_grep`.
 4. GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`; W&B → `wandb`.
 5. Everything else current/external → websearch / webfetch; `zai_search` / `zai_reader` for single lookups and CN sources.
@@ -353,6 +355,8 @@ MCP tools self-describe — read declarations before calling — and take priori
 - Stage completion is not task wind-down: wind down only when the task is settled — delivered and verified, nothing pending on the session — or when the session ends with it unmet.
 - A session ends with its loops closed: every open item is done, blocked with the blocker named, or handed to the user as a decision — agent deferral without a blocker is not a finish.
 ```
+
+> Trim payloads from contradicted and duplicated lines first — a line naming a concrete observed failure survives a trim; length alone is not the axis.
 
 ## 12. Install personal skills (zhtmike/skills)
 
