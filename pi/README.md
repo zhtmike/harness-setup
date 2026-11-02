@@ -387,9 +387,9 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 
 ## Dispatch — sub-tasks via fresh pi instances
 
-pi has no sub-agents by design; dispatch spawns independent lanes (the tools describe their mechanics); the policy:
+Dispatch spawns independent lanes (the tools describe their mechanics); the policy:
 
-- Dispatch when a sub-task deserves its own context: an independent review, read-only exploration before implementing, parallel investigation lanes, verification of a risky change. Parallel research is the one blessed parallel pattern.
+- Dispatch when a sub-task deserves its own context: read-only exploration before implementing, parallel investigation lanes. Parallel research is the one blessed parallel pattern.
 - Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf. Park briefs under your own `.pi/work/s/$PI_SESSION_ID/`: they are written before the wave claim, so bare `.pi/work/` briefs collide across sessions.
 - Tier with the job; pin model + thinking together at spawn, never mid-session: fast model (settings' `enabledModels` carries the fast tier) + low thinking for mechanical recon, fast + medium for substantive investigation; judgment/verdict lanes run unpinned on the default model. Never pin the fast model bare — a model-only pin inherits the global default thinking level. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
 - Never delete `.pi/work` while a leash can still be running — the manifest is the only re-adopt record. Otherwise consume — collect artifacts, judge them — then release the settled wave (`lanes action=release`); a hand-sweep of `.pi/work` is how one session destroys another's. Never signal a wave you didn't dispatch, and a write-capable lane writes data artifacts only, under the dispatcher's claim.
@@ -409,8 +409,7 @@ Duties: plan, implement, verify. One session, one coherent change.
 - Stage flow: one task proceeds through its stages — investigate, design, prove, finish, gate the commit — without asking to continue between stages; the asks are design acceptance, external actions, and genuine unresolvable ambiguity. A context-gathering artifact handoff is a stage boundary, not a stop — the fresh session resumes without asking.
 - Stage completion is not task wind-down: wind down only when the task is settled — delivered and verified, nothing pending on the session — or when the session ends with it unmet.
 - A session ends with its loops closed: every open item is done, blocked with the blocker named, or handed to the user as a decision — agent deferral without a blocker is not a finish.
-- Before finishing risky changes, dispatch an independent review (Dispatch section in AGENTS.md).
-- Concise answers, no preamble, no flattery, honest pushback.
+- No preamble, no flattery, honest pushback.
 ```
 
 > pi loads AGENTS.md from `~/.pi/agent/` + cwd + ancestors (AGENTS.md wins over CLAUDE.md).
