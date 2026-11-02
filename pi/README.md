@@ -387,7 +387,7 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 
 ## Dispatch — sub-tasks via fresh pi instances
 
-pi has no sub-agents by design; dispatch spawns independent read-only lanes (the tools describe their mechanics); the policy:
+pi has no sub-agents by design; dispatch spawns independent lanes (the tools describe their mechanics); the policy:
 
 - Dispatch when a sub-task deserves its own context: an independent review, read-only exploration before implementing, parallel investigation lanes, verification of a risky change. Parallel research is the one blessed parallel pattern.
 - Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf. Park briefs under your own `.pi/work/s/$PI_SESSION_ID/`: they are written before the wave claim, so bare `.pi/work/` briefs collide across sessions.
@@ -409,9 +409,7 @@ Duties: plan, implement, verify. One session, one coherent change.
 - Stage flow: one task proceeds through its stages — investigate, design, prove, finish, gate the commit — without asking to continue between stages; the asks are design acceptance, external actions, and genuine unresolvable ambiguity. A context-gathering artifact handoff is a stage boundary, not a stop — the fresh session resumes without asking.
 - Stage completion is not task wind-down: wind down only when the task is settled — delivered and verified, nothing pending on the session — or when the session ends with it unmet.
 - A session ends with its loops closed: every open item is done, blocked with the blocker named, or handed to the user as a decision — agent deferral without a blocker is not a finish.
-- Workflow skills (survey) dispatch parallel investigation lanes; never invoke
-  them from inside a dispatched instance. Before finishing risky changes, dispatch
-  an independent review (Dispatch section in AGENTS.md).
+- Before finishing risky changes, dispatch an independent review (Dispatch section in AGENTS.md).
 - Concise answers, no preamble, no flattery, honest pushback.
 ```
 
