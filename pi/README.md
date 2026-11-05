@@ -66,7 +66,7 @@ mkdir -p ~/.pi/agent
 }
 ```
 
-> Default glm-5.3, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.3 (fewer turns). Survey lanes pick flash per task, always with a thinking level — a lane pinning only a model inherits this `max` (step 13); the main session stays glm-5.3 (mid-session switches re-bill the cache).
+> Default glm-5.3, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.3 (fewer turns). Survey lanes pick flash per task, always with a thinking level — a lane pinning only a model inherits this `max` (step 13); the main session stays glm-5.3 (mid-session switches re-bill the cache). Image input is flash-only — the `images` column of `pi --list-models` marks glm-5.3 `no` and flash `yes`, so on glm-5.3 a `read` of an image returns only a "model does not support images" note; any session or dispatched lane that must see an image pins flash.
 
 ## 3. Install skills
 
