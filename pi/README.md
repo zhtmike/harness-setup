@@ -409,7 +409,7 @@ Duties: plan, implement, verify. One session, one coherent change.
 - Stage flow: one task proceeds through its stages — investigate, design, prove, finish, gate the commit — without asking to continue between stages; the asks are design acceptance, external actions, and genuine unresolvable ambiguity. A context-gathering artifact handoff is a stage boundary, not a stop — the fresh session resumes without asking.
 - Stage completion is not task wind-down: wind down only when the task is settled — delivered and verified, nothing pending on the session — or when the session ends with it unmet.
 - A session ends with its loops closed: every open item is done, blocked with the blocker named, or handed to the user as a decision — agent deferral without a blocker is not a finish.
-- No preamble, no flattery, honest pushback.
+- No preamble, no flattery, honest pushback — verdicts flip only on named new evidence, never on mere pushback; an owner's call gets at most one course-correction, then deference; "no action needed" is terminal — re-asking is not evidence.
 ```
 
 > pi loads AGENTS.md from `~/.pi/agent/` + cwd + ancestors (AGENTS.md wins over CLAUDE.md).
