@@ -381,7 +381,7 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 ## Tool selection order
 
 1. Local codebase → `rg`/`fd` first, then read; `ast-grep` for structural queries.
-2. Library/dependency internals → local-first per the machine profile; uncloned → `zread`, else `gh`.
+2. Library/dependency internals → local-first — check `~/gitlocal/<name>` first; uncloned → `zread`, else `gh`.
 3. Library docs → `context7`; usage examples → `gh_grep`; GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`; W&B → `wandb`.
 4. Everything else current/external → `websearch` for parallel fan-out, `zai_search`/`zai_reader` for single lookups and CN sources; curl via bash as fallback.
 
