@@ -62,7 +62,7 @@ mkdir -p ~/.pi/agent
   "defaultThinkingLevel": "max",
   "enabledModels": ["zai/glm-5.3", "zai/glm-5.3-flash"],
   "showCacheMissNotices": true,
-  "packages": ["npm:pi-minimal-dispatch"]
+  "packages": ["npm:@zhtmike/pi-minimal-dispatch"]
 }
 ```
 
@@ -362,10 +362,10 @@ MCP, `tool_search`, and codemode are built in. The servers above use the default
 ## 12. Install the dispatch extension
 
 ```bash
-pi install npm:pi-minimal-dispatch
+pi install npm:@zhtmike/pi-minimal-dispatch
 ```
 
-> Writes the `packages` entry into `~/.pi/agent/settings.json` (shown in step 2's payload) and the package into `~/.pi/agent/npm/`. `pi-minimal-dispatch` provides the `dispatch`/`lanes` tools the Dispatch section (next step) runs on: detached lanes that survive the session, derived state, a bounded `lanes wait` action, parentless deadline leash, manifest re-adoption, wave `release` with dispatcher ownership (kill and release refuse a live foreign owner); requires pi ≥ 1.4.0. Update with `pi update --extensions`, remove with `pi remove npm:pi-minimal-dispatch`; the git source (`pi install git:github.com/zhtmike/pi-minimal-dispatch`) tracks main between releases. If the tools ever go missing, the retired bash template is recoverable: `git log -S 'nohup sh -c' -- pi/README.md`.
+> Writes the `packages` entry into `~/.pi/agent/settings.json` (shown in step 2's payload) and the package into `~/.pi/agent/npm/`. `pi-minimal-dispatch` provides the `dispatch`/`lanes` tools the Dispatch section (next step) runs on: detached lanes that survive the session, derived state, a bounded `lanes wait` action, parentless deadline leash, manifest re-adoption, wave `release` with dispatcher ownership (kill and release refuse a live foreign owner); requires pi ≥ 1.4.0. Update with `pi update --extensions`, remove with `pi remove npm:@zhtmike/pi-minimal-dispatch`; the git source (`pi install git:github.com/zhtmike/pi-minimal-dispatch`) tracks main between releases. If the tools ever go missing, the retired bash template is recoverable: `git log -S 'nohup sh -c' -- pi/README.md`.
 
 ## 13. Add usage guidance to AGENTS.md
 
@@ -426,7 +426,7 @@ source ~/.zshrc && pi
 Inside pi:
 
 1. `/model` → zai/glm-5.3; `Shift+Tab` → max; `Ctrl+S` to save.
-2. `/mcp` → all nine servers connected (or `pi mcp list` from the shell); `pi list` → `npm:pi-minimal-dispatch` installed (dispatch/lanes tools load).
+2. `/mcp` → all nine servers connected (or `pi mcp list` from the shell); `pi list` → `npm:@zhtmike/pi-minimal-dispatch` installed (dispatch/lanes tools load).
 3. "Run `gh auth status`" → authenticated — keyring with `Token scopes: 'repo, …'` (env-token setups show their own scopes). Same for `hf auth whoami` and `wandb status`.
 4. "List your skills" → code-review, coding-style, spike, propose, commit-gate, conversation-gate, survey, self-learn.
 5. Smoke test: `/skill:survey <small topic>` → investigation lanes dispatched per the Dispatch section, one synthesized answer; "review this diff" → a single dispatched reviewer.
