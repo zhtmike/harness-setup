@@ -395,16 +395,14 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 
 ## Dispatch — sub-tasks via fresh pi instances
 
-Dispatch spawns independent lanes (the tools describe their mechanics); the policy:
-
 - Dispatch when a sub-task deserves its own context: read-only exploration before implementing, parallel investigation lanes. Parallel research is the one blessed parallel pattern.
-- Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf. Park briefs under your own `.pi/work/s/$PI_SESSION_ID/`: they are written before the wave claim, so bare `.pi/work/` briefs collide across sessions.
-- Tier with the job; pin model + thinking together at spawn, never mid-session: fast model (settings' `enabledModels` carries the fast tier) + low thinking for mechanical recon, fast + high for substantive investigation; judgment/verdict lanes run unpinned on the default model; an image-reading task pins a vision-capable model (`pi --list-models`'s `images` column) — the default model takes none. Never pin the fast model bare — it inherits the default thinking level. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
-- Never delete `.pi/work` while a leash can still be running — the manifest is the only re-adopt record. Otherwise consume — collect artifacts, judge them — then release the settled wave (`lanes action=release`); a hand-sweep of `.pi/work` is how one session destroys another's. Never signal a wave you didn't dispatch, and a write-capable lane writes data artifacts only, under the dispatcher's claim.
+- Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf.
+- Tier with the job; pin model + thinking together at spawn, never mid-session: fast model (settings' `enabledModels` carries the fast tier) + low thinking for mechanical recon, fast + high for substantive investigation; judgment/verdict lanes run unpinned on the default model; an image-reading task pins a vision-capable model (`pi --list-models`'s `images` column) — the default model takes none. Never pin the fast model bare. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
+- A write-capable lane writes data artifacts only, under the dispatcher's claim.
 
 ## Night watch — tasks that outlive the session
 
-- A long-horizon goal with a driver-checkable criteria (a command exiting 0 when done) routes to `night-watch start [--criteria <cmd>] [--goal-file <path>] [<goal>]`; status, advance, and loop mechanics are the tool's own surface.
+- A long-horizon goal with a driver-checkable criteria (a command exiting 0 when done) routes to `night-watch start [--criteria <cmd>] [--goal-file <path>] [<goal>]`.
 - Every watch goal carries an approval sentence naming its actions — the default worker model does not hold the line without one. Merges and protected-ref pushes stay report items.
 ```
 
