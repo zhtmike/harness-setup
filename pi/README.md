@@ -397,7 +397,7 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 
 - Dispatch when a sub-task deserves its own context: read-only exploration before implementing, parallel investigation lanes. Parallel research is the one blessed parallel pattern.
 - Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf.
-- Tier with the job; pin model + thinking together at spawn, never mid-session: fast model (settings' `enabledModels` carries the fast tier) + low thinking for mechanical recon, fast + high for substantive investigation; judgment/verdict lanes run unpinned on the default model; an image-reading task pins a vision-capable model (`pi --list-models`'s `images` column) — the default model takes none. Never pin the fast model bare. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
+- Tier with the job; pin model + thinking together at spawn, never mid-session: fast model (the non-default entry of `enabledModels` in `~/.pi/agent/settings.json`) + low thinking for mechanical recon, fast + high for substantive investigation; judgment/verdict lanes run unpinned on the default model; an image-reading task pins a vision-capable model (`pi --list-models`'s `images` column) — the default model takes none. Never pin the fast model bare. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
 - A write-capable lane writes data artifacts only, under the dispatcher's claim.
 
 ## Night watch — tasks that outlive the session
