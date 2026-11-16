@@ -373,7 +373,7 @@ pi install npm:@zhtmike/pi-minimal-dispatch
 pi install npm:@zhtmike/pi-night-watch
 ```
 
-> Adds `/watch` (start/status/advance/stop) and the `night-watch` kicker bin: a long-horizon worker/reviewer loop — unattended full-capability worker rounds, fresh-context reviewer verdicts, driver-run pass criteria, budgets, crash recovery. Requires GNU `timeout` (macOS: coreutils from step 4 — `timeout` resolves on PATH). Approvals ride the goal text: an approval sentence in the start goal covers exactly the actions the goal names — every watch goal carries one (Night watch section, step 14). Config, budgets, cron recipes: the repo's `docs/api.md`. Update with `pi update --extensions`; the git source (`pi install git:github.com/zhtmike/pi-night-watch`) tracks main. The bin lands in `~/.pi/agent/npm/node_modules/.bin/` — not on PATH by default; `export PATH="$HOME/.pi/agent/npm/node_modules/.bin:$PATH"` in `~/.zshrc` covers every extension bin, present and future (agents' bash inherits it; cron entries keep absolute paths).
+> Adds `/watch` (start/status/advance/stop) and the `night-watch` kicker bin: a long-horizon worker/reviewer loop — unattended full-capability worker rounds, fresh-context reviewer verdicts, driver-run pass criteria, budgets, crash recovery. Requires GNU `timeout` (macOS: coreutils from step 4 — `timeout` resolves on PATH). Approvals ride the goal text: an approval sentence in the start goal covers exactly the actions the goal names — the bin's usage failure teaches composing one. Config, budgets, cron recipes: the repo's `docs/api.md`. Update with `pi update --extensions`; the git source (`pi install git:github.com/zhtmike/pi-night-watch`) tracks main. The bin lands in `~/.pi/agent/npm/node_modules/.bin/` — not on PATH by default; `export PATH="$HOME/.pi/agent/npm/node_modules/.bin:$PATH"` in `~/.zshrc` covers every extension bin, present and future (agents' bash inherits it; cron entries keep absolute paths).
 
 ## 14. Add usage guidance to AGENTS.md
 
@@ -399,11 +399,6 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 - Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf.
 - Tier with the job; pin model + thinking together at spawn, never mid-session: fast model (the non-default entry of `enabledModels` in `~/.pi/agent/settings.json`) + low thinking for mechanical recon, fast + high for substantive investigation; judgment/verdict lanes run unpinned on the default model; an image-reading task pins a vision-capable model (`pi --list-models`'s `images` column). Never pin the fast model bare. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
 - A write-capable lane writes data artifacts only, under the dispatcher's claim.
-
-## Night watch — tasks that outlive the session
-
-- A long-horizon goal with a driver-checkable criteria (a command exiting 0 when done) routes to `night-watch start [--criteria <cmd>] [--goal-file <path>] [<goal>]`.
-- Every watch goal carries an approval sentence naming its actions — the default worker model does not hold the line without one. Merges and protected-ref pushes stay report items.
 ```
 
 `~/.pi/agent/APPEND_SYSTEM.md`:
@@ -442,7 +437,7 @@ In pi and the shell:
 4. "List your skills" → code-review, coding-style, spike, propose, commit-gate, conversation-gate, survey, self-learn.
 5. Smoke test: `/skill:survey <small topic>` → investigation lanes dispatched per the Dispatch section, one synthesized answer; "review this diff" → a single dispatched reviewer.
 6. `/watch` → the inspector's no-task state (`night-watch error: no tasks in this workspace (start one first)`) — zero model tokens.
-7. (shell) `which night-watch` → resolves (PATH line, step 13); the bare bin prints usage listing `start | advance | status` — the agent-reachable entry.
+7. (shell) `which night-watch` → resolves (PATH line, step 13); the bare bin prints usage listing `start | advance | status` plus the approval-sentence note — the agent-reachable entry.
 
 > Daily: `Ctrl+L` model picker (`Ctrl+P` cycles), `Shift+Tab` thinking, `pi -c` continue, `pi -r` resume, `pi --print "task"` one-shot, `pi --no-mcp --tools read,grep,find,ls` read-only (MCP-free), `!cmd` shell, `/tree` edit earlier message, `/reload` after config changes.
 > TUI: fullscreen is the default (`"tuiMode": "regular"` reverts); `"theme"` in settings.json (default `system`; custom themes in `~/.pi/agent/themes/`); keybindings in `~/.pi/agent/keybindings.json` (`/hotkeys` lists current).
