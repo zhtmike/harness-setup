@@ -396,7 +396,7 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 ## Dispatch — sub-tasks via fresh pi instances
 
 - Dispatch when a sub-task deserves its own context: read-only exploration before implementing, parallel investigation lanes. Parallel research is the one blessed parallel pattern.
-- Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf.
+- Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf; the cheaper the lane, the fuller the brief: fast-model lanes execute plans, not goals — decomposition and judgment calls live in the brief.
 - Tier with the job; pin model + thinking together at spawn, never mid-session: mechanical recon on the fast model (the non-default entry of `enabledModels` in `~/.pi/agent/settings.json`) at low thinking, substantive investigation on fast at high, judgment and verdict work on the default model at high or maximum thinking. An image-reading task pins a vision-capable model (`pi --list-models`'s `images` column). Never pin the fast model bare. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
 - A write-capable lane writes data artifacts only, under the dispatcher's claim.
 ```
