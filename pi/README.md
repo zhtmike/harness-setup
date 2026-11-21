@@ -62,11 +62,11 @@ mkdir -p ~/.pi/agent
   "defaultThinkingLevel": "max",
   "enabledModels": ["zai/glm-5.3", "zai/glm-5.3-flash"],
   "showCacheMissNotices": true,
-  "packages": ["npm:@zhtmike/pi-minimal-dispatch", "npm:@zhtmike/pi-night-watch"]
+  "packages": ["npm:@zhtmike/pi-minimal-dispatch", "git:github.com/zhtmike/pi-kit"]
 }
 ```
 
-> Default glm-5.3, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.3 (fewer turns). Survey lanes pick flash per task except verdict-gating lanes (the default model), always with a thinking level — a lane pinning only a model inherits this `max` (step 14); the main session stays glm-5.3 (mid-session switches re-bill the cache). Image input is flash-only — the `images` column of `pi --list-models` marks glm-5.3 `no` and flash `yes`, so on glm-5.3 a `read` of an image returns only a "model does not support images" note; any session or dispatched lane that must see an image pins flash.
+> Default glm-5.3, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.3 (fewer turns). Survey lanes pick flash per task except verdict-gating lanes (the default model), always with a thinking level — a lane pinning only a model inherits this `max` (step 13); the main session stays glm-5.3 (mid-session switches re-bill the cache). Image input is flash-only — the `images` column of `pi --list-models` marks glm-5.3 `no` and flash `yes`, so on glm-5.3 a `read` of an image returns only a "model does not support images" note; any session or dispatched lane that must see an image pins flash.
 
 ## 3. Install skills
 
@@ -368,7 +368,7 @@ cat > ~/.pi/agent/pi-minimal-dispatch.json <<'EOF'
 EOF
 ```
 
-> Writes the `packages` entry into `~/.pi/agent/settings.json` (shown in step 2's payload) and the package into `~/.pi/agent/npm/`. `pi-minimal-dispatch` provides the `dispatch`/`lanes` tools the Dispatch section (step 14) runs on: detached lanes that survive the session, derived state, a bounded `lanes wait` action, parentless deadline leash, manifest re-adoption, wave `release` with dispatcher ownership (kill and release refuse a live foreign owner); requires pi ≥ 1.4.0. Update with `pi update --extensions`, remove with `pi remove npm:@zhtmike/pi-minimal-dispatch`; the git source (`pi install git:github.com/zhtmike/pi-minimal-dispatch`) tracks main between releases. The config write sets `maxDefaultLanes` — the retired ≤-3 clause's rule, now a tool-enforced cap; the package's `docs/api.md` (`#configuration`) carries the semantics. If the tools ever go missing, the retired bash template is recoverable: `git log -S 'nohup sh -c' -- pi/README.md`.
+> Writes the `packages` entry into `~/.pi/agent/settings.json` (shown in step 2's payload) and the package into `~/.pi/agent/npm/`. `pi-minimal-dispatch` provides the `dispatch`/`lanes` tools the Dispatch section (step 13) runs on: detached lanes that survive the session, derived state, a bounded `lanes wait` action, parentless deadline leash, manifest re-adoption, wave `release` with dispatcher ownership (kill and release refuse a live foreign owner); requires pi ≥ 1.4.0. Update with `pi update --extensions`, remove with `pi remove npm:@zhtmike/pi-minimal-dispatch`; the git source (`pi install git:github.com/zhtmike/pi-minimal-dispatch`) tracks main between releases. The config write sets `maxDefaultLanes` — the retired ≤-3 clause's rule, now a tool-enforced cap; the package's `docs/api.md` (`#configuration`) carries the semantics. If the tools ever go missing, the retired bash template is recoverable: `git log -S 'nohup sh -c' -- pi/README.md`.
 
 Then the personal gate package (checkout claim, git/gh approval floors, review scaffolds — it replaces the workflow payload's checkout-claim bullet and the commit/conversation gates' mechanical halves):
 
@@ -386,15 +386,7 @@ EOF
 
 > Same overlay rules as pi's settings (defaults → agent dir → project `.pi/pi-kit.json`). `ownerLogins` gates `git push`; the `zhtmike/skills` standing allow is skills/AGENTS.md's pre-approval, tool-enforced. Semantics: the repo's `docs/api.md`. Update with `pi update --extensions`. A bad config file fences every gated op and aborts the session at startup — fix the file, restart.
 
-## 13. Install the night-watch extension
-
-```bash
-pi install npm:@zhtmike/pi-night-watch
-```
-
-> Adds `/watch` (start/status/advance/stop) and the `night-watch` kicker bin: a long-horizon worker/reviewer loop — unattended full-capability worker rounds, fresh-context reviewer verdicts, driver-run pass criteria, budgets, crash recovery. Requires GNU `timeout` (macOS: coreutils from step 4 — `timeout` resolves on PATH). Approvals ride the goal text: an approval sentence in the start goal covers exactly the actions the goal names — the bin's usage failure teaches composing one. Config, budgets, cron recipes: the repo's `docs/api.md`. Update with `pi update --extensions`; the git source (`pi install git:github.com/zhtmike/pi-night-watch`) tracks main. The bin lands in `~/.pi/agent/npm/node_modules/.bin/` — not on PATH by default; `export PATH="$HOME/.pi/agent/npm/node_modules/.bin:$PATH"` in `~/.zshrc` covers every extension bin, present and future (agents' bash inherits it; cron entries keep absolute paths).
-
-## 14. Add usage guidance to AGENTS.md
+## 13. Add usage guidance to AGENTS.md
 
 `~/.pi/agent/AGENTS.md`:
 
@@ -441,7 +433,7 @@ Duties: plan, implement, verify. One session, one coherent change.
 
 > The isolation rules exist because concurrent sessions in one repo share `.pi/work` and the checkout: session dirs namespace scratch (the full session id — a uuidv7 prefix is a ~65 s timestamp window that collides for concurrent sessions), `release` is the only wave cleanup, and pi-kit's `checkout` claim keeps one editor per checkout (a second task takes `checkout`'s worktree). Refusals met there are by design — never worked around.
 
-## 15. Verify
+## 14. Verify
 
 ```bash
 source ~/.zshrc && pi
@@ -450,12 +442,10 @@ source ~/.zshrc && pi
 In pi and the shell:
 
 1. `/model` → zai/glm-5.3; `Shift+Tab` → max; `Ctrl+S` to save.
-2. `/mcp` → all nine servers connected (or `pi mcp list` from the shell); `pi list` → `npm:@zhtmike/pi-minimal-dispatch` and `npm:@zhtmike/pi-night-watch` installed (dispatch/lanes tools, `/watch` command load).
+2. `/mcp` → all nine servers connected (or `pi mcp list` from the shell); `pi list` → `npm:@zhtmike/pi-minimal-dispatch` and `git:github.com/zhtmike/pi-kit` installed (dispatch/lanes + the six pi-kit tools load).
 3. "Run `gh auth status`" → authenticated — keyring with `Token scopes: 'repo, …'` (env-token setups show their own scopes). Same for `hf auth whoami` and `wandb status`.
 4. "List your skills" → code-review, coding-style, spike, propose, commit-gate, conversation-gate, survey, self-learn.
-5. Smoke test: `/skill:survey <small topic>` → investigation lanes dispatched per the Dispatch section, one synthesized answer; "review this diff" → a single dispatched reviewer.
-6. `/watch` → the inspector's no-task state (`night-watch error: no tasks in this workspace (start one first)`) — zero model tokens.
-7. (shell) `which night-watch` → resolves (PATH line, step 13); the bare bin prints usage listing `start | advance | status` plus the approval-sentence note — the agent-reachable entry.
+5. Smoke test: `/skill:survey <small topic>` → investigation lanes dispatched per the Dispatch section, one synthesized answer; "review this diff" → a single dispatched reviewer; `checkout` (action `status`) → the claim stamp state.
 
 > Daily: `Ctrl+L` model picker (`Ctrl+P` cycles), `Shift+Tab` thinking, `pi -c` continue, `pi -r` resume, `pi --print "task"` one-shot, `pi --no-mcp --tools read,grep,find,ls` read-only (MCP-free), `!cmd` shell, `/tree` edit earlier message, `/reload` after config changes.
 > TUI: fullscreen is the default (`"tuiMode": "regular"` reverts); `"theme"` in settings.json (default `system`; custom themes in `~/.pi/agent/themes/`); keybindings in `~/.pi/agent/keybindings.json` (`/hotkeys` lists current).
