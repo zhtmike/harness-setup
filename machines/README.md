@@ -13,7 +13,6 @@ ln -sfn ~/gitlocal/harness-setup/machines/macbook.md ~/AGENTS.md
 Non-default local state (default values are never recorded):
 
 - pi `~/.pi/agent/settings.json` carries `hideThinkingBlock: true` beyond the guide payload.
-- pi `packages` carries `../../gitlocal/pi-kit` — a local-path dev install; the guide's `git:` source (step 12) is the steady-state channel.
 
 ## Support scripts
 
