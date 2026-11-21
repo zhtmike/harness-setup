@@ -376,16 +376,13 @@ Then the personal gate package (checkout claim, git/gh approval floors, review s
 pi install git:github.com/zhtmike/pi-kit
 cat > ~/.pi/agent/pi-kit.json <<'EOF'
 {
-	"ownerLogins": ["zhtmike"],
-	"standingAllows": [
-		{ "repo": "zhtmike/skills", "shapes": ["git_commit", "git push"] },
-		{ "repo": "*", "shapes": ["git_commit", "git push", "gh pr create", "gh pr edit", "gh comment", "git tag", "gh release"] }
-	]
+	"ownerLogins": ["<your-github-login>"],
+	"standingAllows": []
 }
 EOF
 ```
 
-> Same overlay rules as pi's settings (defaults → agent dir → project `.pi/pi-kit.json`). `ownerLogins` gates `git push` (owner-checked under any allow); the `zhtmike/skills` standing allow is skills/AGENTS.md's pre-approval, tool-enforced; the `"*"` entry is the owner's blanket pre-approval of every ask shape on every repo — ask-tier dialogs disappear for agent-typed git/gh (0.2.1: every ask shape also offers "Approve for this session"), while destructive and refuse rows stay gated by design. Semantics: the repo's `docs/api.md`. Update with `pi update --extensions`. A bad config file fences every gated op and aborts the session at startup — fix the file, restart.
+> Same overlay rules as pi's settings (defaults → agent dir → project `.pi/pi-kit.json`). **`ownerLogins` is yours** — put your own GitHub login there: it gates `git push` (owner-checked under any allow), and a copied login means every push of yours refuses. Keep `standingAllows` empty unless you consciously opt in: an entry like `{ "repo": "*", "shapes": ["git_commit", "git push", "gh pr create", "gh pr edit", "gh comment", "git tag", "gh release"] }` pre-approves every ask shape on every repo (this machine's owner runs it — ask-tier dialogs disappear for agent-typed git/gh; 0.2.1+: every ask shape also offers "Approve for this session"), while destructive and refuse rows stay gated by design either way. Per-repo entries are the tamer form. Semantics: the repo's `docs/api.md`. Update with `pi update --extensions`. A bad config file fences every gated op and aborts the session at startup — fix the file, restart.
 
 ## 13. Add usage guidance to AGENTS.md
 
