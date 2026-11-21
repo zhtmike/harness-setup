@@ -419,7 +419,6 @@ Duties: plan, implement, verify. One session, one coherent change.
 
 - Non-trivial work: write `.pi/work/PLAN.md` first, track in `.pi/work/TODO.md` — both under your session dir `.pi/work/s/$PI_SESSION_ID/` (the full id).
 - Artifacts are ephemeral: when the change ships, delete its `.pi/work/` files (`checkout` action `clean` covers the session dir) — yours only: your session dir and your settled waves (`lanes action=release`); another session's artifacts are never yours to delete. Stale plans mislead fresh sessions; a sweep destroys siblings.
-- Context gathering: separate read-only session → artifact file → implementation in a fresh session that reads the artifact (never dispatch parallel implementing agents).
 - Stage flow: one task proceeds through its stages — investigate, design, prove, finish, gate the commit — without asking to continue between stages; the asks are design acceptance, external actions, and genuine unresolvable ambiguity. A context-gathering artifact handoff is a stage boundary, not a stop — the fresh session resumes without asking.
 - Stage completion is not task wind-down: wind down only when the task is settled — delivered and verified, nothing pending on the session — or when the session ends with it unmet.
 - A session ends with its loops closed: every open item is done, blocked with the blocker named, or handed to the user as a decision — agent deferral without a blocker is not a finish.
