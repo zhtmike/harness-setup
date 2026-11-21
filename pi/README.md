@@ -363,9 +363,12 @@ MCP, `tool_search`, and codemode are built in. The servers above use the default
 
 ```bash
 pi install npm:@zhtmike/pi-minimal-dispatch
+cat > ~/.pi/agent/pi-minimal-dispatch.json <<'EOF'
+{ "maxDefaultLanes": 3 }
+EOF
 ```
 
-> Writes the `packages` entry into `~/.pi/agent/settings.json` (shown in step 2's payload) and the package into `~/.pi/agent/npm/`. `pi-minimal-dispatch` provides the `dispatch`/`lanes` tools the Dispatch section (step 14) runs on: detached lanes that survive the session, derived state, a bounded `lanes wait` action, parentless deadline leash, manifest re-adoption, wave `release` with dispatcher ownership (kill and release refuse a live foreign owner); requires pi ≥ 1.4.0. Update with `pi update --extensions`, remove with `pi remove npm:@zhtmike/pi-minimal-dispatch`; the git source (`pi install git:github.com/zhtmike/pi-minimal-dispatch`) tracks main between releases. If the tools ever go missing, the retired bash template is recoverable: `git log -S 'nohup sh -c' -- pi/README.md`.
+> Writes the `packages` entry into `~/.pi/agent/settings.json` (shown in step 2's payload) and the package into `~/.pi/agent/npm/`. `pi-minimal-dispatch` provides the `dispatch`/`lanes` tools the Dispatch section (step 14) runs on: detached lanes that survive the session, derived state, a bounded `lanes wait` action, parentless deadline leash, manifest re-adoption, wave `release` with dispatcher ownership (kill and release refuse a live foreign owner); requires pi ≥ 1.4.0. Update with `pi update --extensions`, remove with `pi remove npm:@zhtmike/pi-minimal-dispatch`; the git source (`pi install git:github.com/zhtmike/pi-minimal-dispatch`) tracks main between releases. The config write sets `maxDefaultLanes` — the retired ≤-3 clause's rule, now a tool-enforced cap; the package's `docs/api.md` (`#configuration`) carries the semantics. If the tools ever go missing, the retired bash template is recoverable: `git log -S 'nohup sh -c' -- pi/README.md`.
 
 ## 13. Install the night-watch extension
 
@@ -397,7 +400,7 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 
 - Dispatch when a sub-task deserves its own context: read-only exploration before implementing, parallel investigation lanes. Parallel research is the one blessed parallel pattern.
 - Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf; the cheaper the lane, the fuller the brief: fast-model lanes execute plans, not goals — decomposition and judgment calls live in the brief.
-- Tier with the job; pin model + thinking together at spawn, never mid-session: mechanical recon on the fast model (the non-default entry of `enabledModels` in `~/.pi/agent/settings.json`) at low thinking, substantive investigation on fast at high, judgment and verdict work on the default model at high or maximum thinking. An image-reading task pins a vision-capable model (`pi --list-models`'s `images` column). Never pin the fast model bare. Keep concurrent default-model lanes ≤ 3; a rate-limited provider runs lanes sequentially.
+- Tier with the job; pin model + thinking together at spawn, never mid-session: mechanical recon on the fast model (the non-default entry of `enabledModels` in `~/.pi/agent/settings.json`) at low thinking, substantive investigation on fast at high, judgment and verdict work on the default model at high or maximum thinking. An image-reading task pins a vision-capable model (`pi --list-models`'s `images` column). Never pin the fast model bare. A rate-limited provider runs lanes sequentially.
 - A write-capable lane writes data artifacts only, under the dispatcher's claim.
 ```
 
