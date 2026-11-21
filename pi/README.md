@@ -370,6 +370,22 @@ EOF
 
 > Writes the `packages` entry into `~/.pi/agent/settings.json` (shown in step 2's payload) and the package into `~/.pi/agent/npm/`. `pi-minimal-dispatch` provides the `dispatch`/`lanes` tools the Dispatch section (step 14) runs on: detached lanes that survive the session, derived state, a bounded `lanes wait` action, parentless deadline leash, manifest re-adoption, wave `release` with dispatcher ownership (kill and release refuse a live foreign owner); requires pi ≥ 1.4.0. Update with `pi update --extensions`, remove with `pi remove npm:@zhtmike/pi-minimal-dispatch`; the git source (`pi install git:github.com/zhtmike/pi-minimal-dispatch`) tracks main between releases. The config write sets `maxDefaultLanes` — the retired ≤-3 clause's rule, now a tool-enforced cap; the package's `docs/api.md` (`#configuration`) carries the semantics. If the tools ever go missing, the retired bash template is recoverable: `git log -S 'nohup sh -c' -- pi/README.md`.
 
+Then the personal gate package (checkout claim, git/gh approval floors, review scaffolds — it replaces the workflow payload's checkout-claim bullet and the commit/conversation gates' mechanical halves):
+
+```bash
+pi install git:github.com/zhtmike/pi-kit
+cat > ~/.pi/agent/pi-kit.json <<'EOF'
+{
+	"ownerLogins": ["zhtmike"],
+	"standingAllows": [
+		{ "repo": "zhtmike/skills", "shapes": ["git_commit", "git push"] }
+	]
+}
+EOF
+```
+
+> Same overlay rules as pi's settings (defaults → agent dir → project `.pi/pi-kit.json`). `ownerLogins` gates `git push`; the `zhtmike/skills` standing allow is skills/AGENTS.md's pre-approval, tool-enforced. Semantics: the repo's `docs/api.md`. Update with `pi update --extensions`. A bad config file fences every gated op and aborts the session at startup — fix the file, restart.
+
 ## 13. Install the night-watch extension
 
 ```bash
@@ -412,8 +428,7 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 Duties: plan, implement, verify. One session, one coherent change.
 
 - Non-trivial work: write `.pi/work/PLAN.md` first, track in `.pi/work/TODO.md` — both under your session dir `.pi/work/s/$PI_SESSION_ID/` (the full id).
-- Artifacts are ephemeral: when the change ships, delete its `.pi/work/` files — yours only: your session dir and your settled waves (`lanes action=release`); another session's artifacts are never yours to delete. Stale plans mislead fresh sessions; a sweep destroys siblings.
-- Concurrent sessions share the checkout: claim it before the first edit — `.pi/OWNER.json` `{sid,pid,host,lstart}` (pid `ps -o ppid= -p $$`, live iff its start-time string still matches), written noclobber. A live foreign claim ⇒ run the task in a worktree outside `~/gitlocal`, never the shared tree; dead ⇒ replace; yours ⇒ release at wind-down.
+- Artifacts are ephemeral: when the change ships, delete its `.pi/work/` files (`checkout` action `clean` covers the session dir) — yours only: your session dir and your settled waves (`lanes action=release`); another session's artifacts are never yours to delete. Stale plans mislead fresh sessions; a sweep destroys siblings.
 - Context gathering: separate read-only session → artifact file → implementation in a fresh session that reads the artifact (never dispatch parallel implementing agents).
 - Stage flow: one task proceeds through its stages — investigate, design, prove, finish, gate the commit — without asking to continue between stages; the asks are design acceptance, external actions, and genuine unresolvable ambiguity. A context-gathering artifact handoff is a stage boundary, not a stop — the fresh session resumes without asking.
 - Stage completion is not task wind-down: wind down only when the task is settled — delivered and verified, nothing pending on the session — or when the session ends with it unmet.
@@ -424,7 +439,7 @@ Duties: plan, implement, verify. One session, one coherent change.
 > pi loads AGENTS.md from `~/.pi/agent/` + cwd + ancestors (AGENTS.md wins over CLAUDE.md).
 > Trim payloads from contradicted and duplicated lines first — a line naming a concrete observed failure survives a trim; length alone is not the axis.
 
-> The isolation rules exist because concurrent sessions in one repo share `.pi/work` and the checkout: session dirs namespace scratch (the full session id — a uuidv7 prefix is a ~65 s timestamp window that collides for concurrent sessions), `release` is the only wave cleanup, and the OWNER claim keeps one editor per checkout (a second task takes a worktree). Refusals met there are by design — never worked around.
+> The isolation rules exist because concurrent sessions in one repo share `.pi/work` and the checkout: session dirs namespace scratch (the full session id — a uuidv7 prefix is a ~65 s timestamp window that collides for concurrent sessions), `release` is the only wave cleanup, and pi-kit's `checkout` claim keeps one editor per checkout (a second task takes `checkout`'s worktree). Refusals met there are by design — never worked around.
 
 ## 15. Verify
 
