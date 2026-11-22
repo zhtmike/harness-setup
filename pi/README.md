@@ -376,6 +376,7 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 - Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf; the cheaper the lane, the fuller the brief: fast-model lanes execute plans, not goals — decomposition and judgment calls live in the brief.
 - Tier with the job; pin model + thinking together at spawn, never mid-session: mechanical recon on the fast model (the non-default entry of `enabledModels` in `~/.pi/agent/settings.json`) at low thinking, substantive investigation on fast at high, judgment and verdict work on the default model at high or maximum thinking. An image-reading task pins a vision-capable model (`pi --list-models`'s `images` column). Never pin the fast model bare. A provider whose lanes fail on rate limits runs them sequentially.
 - A write-capable lane writes data artifacts only, under the dispatcher's claim.
+- The single-lane implementation exception: eligible when the contract serializes whole — spec, file scope, acceptance checks fit one brief — and execution is expected noisy; pin the fast model with max thinking; the lane edits only inside a dispatcher-assigned worktree and lands only dispatcher-assigned artifact paths (patch + report) named in its final message; the parent applies, verifies, and lands the patch through the normal commit gate — the lane never lands code.
 ```
 
 `~/.pi/agent/APPEND_SYSTEM.md`:
