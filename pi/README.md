@@ -85,7 +85,7 @@ ln -sfn ~/gitlocal/skills/survey ~/.agents/skills/survey
 ln -sfn ~/gitlocal/skills/self-learn ~/.agents/skills/self-learn
 ```
 
-> `~/.agents/skills/` is the cross-agent skills standard dir — pi reads it natively. Symlinks keep `git pull` in `~/gitlocal/skills` as the single source of truth; skip the clone if the directory already exists. `/reload` after any change.
+> `~/.agents/skills/` is the cross-agent skills standard dir — pi reads it natively. Symlinks keep `git pull` in `~/gitlocal/skills` as the single source of truth; skip the clone if the directory already exists. `/reload` after any change. `git -C ~/gitlocal/skills pull --ff-only` updates them (symlinks track the clone — they never self-update; extensions ride `pi update --extensions`).
 > More skills on demand only when needed: `gh skill search` / `hf skills list` — never pre-installed globally.
 
 ## 4. Install CLI tools
@@ -365,7 +365,7 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 
 ## Tool selection order
 
-1. Local codebase → `rg`/`fd` first, then read; `ast-grep` for structural queries.
+1. Local codebase → `rg`/`fd` first, then read; `ast-grep` for structural queries — scope searches to known paths; global or systematic sweeps (repo roots, home, unscoped globs) are out.
 2. Library/dependency internals → local-first — check `~/gitlocal/<name>` first; uncloned → `zread`, else `gh`.
 3. Library docs → `context7`; usage examples → `gh_grep`; GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`.
 4. Everything else current/external → `websearch` for parallel fan-out, `zai_search`/`zai_reader` for single lookups and CN sources; curl via bash as fallback.
@@ -373,7 +373,7 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 ## Dispatch — sub-tasks via fresh pi instances
 
 - Dispatch is the default for self-contained sub-tasks; the main session keeps judgment, small edits, and the gates. Research fans out in parallel lanes; implementation dispatches one lane at a time, eligible when its contract serializes whole — spec, file scope, and acceptance checks fit one brief, decision-complete: the lane makes no decision the brief could have made.
-- Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf; a lane that runs tests gets the covering subset named in the brief, never an unscoped full suite; the cheaper the lane, the fuller the brief: fast-model lanes execute plans, not goals — decomposition and judgment calls live in the brief.
+- Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf; a lane running tests gets the covering subset named in its brief; the cheaper the lane, the fuller the brief: fast-model lanes execute plans, not goals — decomposition and judgment calls live in the brief.
 - Tier with the job; pin model + thinking together at spawn, never mid-session: mechanical recon on the fast model (the non-default entry of `enabledModels` in `~/.pi/agent/settings.json`) at low thinking, substantive investigation and implementation lanes on fast at high or maximum thinking, judgment and verdict work on the default model at high or maximum thinking. An image-reading task pins a vision-capable model (`pi --list-models`'s `images` column). Never pin the fast model bare.
 - A write-capable lane writes data artifacts only, under the dispatcher's claim. An implementation lane edits only inside a dispatcher-assigned worktree and lands only dispatcher-assigned artifact paths (patch + report) named in its final message; the parent applies, verifies, and lands the patch through the normal commit gate — the lane never lands code.
 ```
