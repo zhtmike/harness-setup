@@ -365,7 +365,7 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 
 ## Tool selection order
 
-1. Local codebase → `rg`/`fd` first, then read; `ast-grep` for structural queries — scope searches to known paths; global or systematic sweeps (repo roots, home, unscoped globs) are out.
+1. Local codebase → `rg`/`fd` first, then read; `ast-grep` for structural queries — scope searches to the repo or known subtrees; sweeps outside the repo (home, parent dirs) and unscoped broad globs are out.
 2. Library/dependency internals → local-first — check `~/gitlocal/<name>` first; uncloned → `zread`, else `gh`.
 3. Library docs → `context7`; usage examples → `gh_grep`; GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`.
 4. Everything else current/external → `websearch` for parallel fan-out, `zai_search`/`zai_reader` for single lookups and CN sources; curl via bash as fallback.
@@ -374,8 +374,8 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 
 - Dispatch is the default for self-contained sub-tasks; the main session keeps judgment, small edits, and the gates. Research fans out in parallel lanes; implementation dispatches one lane at a time, eligible when its contract serializes whole — spec, file scope, and acceptance checks fit one brief, decision-complete: the lane makes no decision the brief could have made.
 - Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf; a lane running tests gets the covering subset named in its brief; the cheaper the lane, the fuller the brief: fast-model lanes execute plans, not goals — decomposition and judgment calls live in the brief.
-- Tier with the job; pin model + thinking together at spawn, never mid-session: mechanical recon on the fast model (the non-default entry of `enabledModels` in `~/.pi/agent/settings.json`) at low thinking, substantive investigation and implementation lanes on fast at high or maximum thinking, judgment and verdict work on the default model at high or maximum thinking. An image-reading task pins a vision-capable model (`pi --list-models`'s `images` column). Never pin the fast model bare.
-- A write-capable lane writes data artifacts only, under the dispatcher's claim. An implementation lane edits only inside a dispatcher-assigned worktree and lands only dispatcher-assigned artifact paths (patch + report) named in its final message; the parent applies, verifies, and lands the patch through the normal commit gate — the lane never lands code.
+- Tier with the job; pin model + thinking together at spawn, never mid-session: mechanical recon on the fast model (the cheapest entry of `enabledModels` in `~/.pi/agent/settings.json`) at low thinking, substantive investigation and routine implementation lanes on fast at high or maximum thinking, complex implementation, judgment, and verdict work on the default model at high or maximum thinking. An image-reading task pins a vision-capable model (`pi --list-models`'s `images` column). Never pin the fast model bare.
+- Non-implementation write lanes write data artifacts only, under the dispatcher's claim. An implementation lane edits only inside a dispatcher-assigned worktree and writes only dispatcher-assigned artifact paths (patch + report) named in its final message; the parent inspects the diff, applies, verifies independently, and lands the patch through the normal commit gate — the lane never lands code.
 ```
 
 `~/.pi/agent/APPEND_SYSTEM.md`:
@@ -387,7 +387,7 @@ Duties: plan, implement, verify. One session, one coherent change.
 
 - Non-trivial work: write `.pi/work/PLAN.md` first, track in `.pi/work/TODO.md` — both under your session dir `.pi/work/s/$PI_SESSION_ID/` (the full id).
 - Artifacts are ephemeral: when the change ships, delete its `.pi/work/` files (`checkout` action `clean` covers the session dir) — yours only: your session dir and your settled waves (`lanes action=release`); another session's artifacts are never yours to delete. Stale plans mislead fresh sessions; a sweep destroys siblings.
-- Stage flow: one task proceeds through its stages — investigate, design, prove, finish, gate the commit — without asking to continue between stages; the asks are design acceptance, external actions, and genuine unresolvable ambiguity. A context-gathering artifact handoff is a stage boundary, not a stop — the fresh session resumes without asking.
+- Stage flow: one task proceeds through its stages — investigate, design, prove, finish, gate the commit — without asking to continue between stages; the asks are design acceptance, external actions, and genuine unresolvable ambiguity. A fresh session resuming from the task's plan/todo artifacts is a stage boundary, not a stop.
 - Stage completion is not task wind-down: wind down only when the task is settled — delivered and verified, nothing pending on the session — or when the session ends with it unmet.
 - A session ends with its loops closed: every open item is done, blocked with the blocker named, or handed to the user as a decision — agent deferral without a blocker is not a finish.
 - No preamble, no flattery, honest pushback — verdicts flip only on named new evidence, never on mere pushback; an owner's call gets at most one course-correction, then deference; "no action needed" is terminal — re-asking is not evidence.
