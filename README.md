@@ -2,6 +2,8 @@
 
 Personal setup guides for the coding-agent harnesses I run — one `<harness>/README.md` per directory. This is the standing home: a new harness gets a new directory; a retired harness's directory gets deleted.
 
+The workflow's layers, each repo self-contained: this repo (environment setup — installs and wires the rest, carries the agent-context payloads), `zhtmike/skills` (portable judgment and best practices — installed on every harness), `pi-kit` (personal hard-boundary tools — pi-only, git-installed, never published), `pi-minimal-dispatch` (public dispatch extension — npm, pi-only). Pi's guide wires the two extensions; the shared skills step installs the skills everywhere; all four are usable by anyone.
+
 The guides share a deliberate spine (install → providers → MCP servers → AGENTS.md guidance → skills → verify) and diverge in harness specifics.
 
 ## Guides
