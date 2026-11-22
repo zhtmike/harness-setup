@@ -58,11 +58,11 @@ opencode models
 npx oh-my-opencode-slim@latest install
 ```
 
-This generates `opencode.json` (or `opencode.jsonc` if one already exists), `tui.json`, and `oh-my-opencode-slim.json` with stock presets. Replace `~/.config/opencode/oh-my-opencode-slim.json` with the customized version below (step 13).
+This generates `opencode.json` (or `opencode.jsonc` if one already exists), `tui.json`, and `oh-my-opencode-slim.json` with stock presets. Replace `~/.config/opencode/oh-my-opencode-slim.json` with the customized version below (step 12).
 
-oh-my-opencode-slim auto-provides **context7** and **gh_grep** — add them to `opencode.jsonc` only for API-key auth (context7) or visibility (gh_grep). **Websearch** is an OpenCode built-in tool (step 8); the **Z.AI plan MCPs** (step 8), **gh**, **wandb**, and **hf** always need explicit config.
+oh-my-opencode-slim auto-provides **context7** and **gh_grep** — add them to `opencode.jsonc` only for API-key auth (context7) or visibility (gh_grep). **Websearch** is an OpenCode built-in tool (step 7); the **Z.AI plan MCPs** (step 7), **gh**, and **hf** always need explicit config.
 
-All MCP servers live under `"mcp"."servers"` in `~/.config/opencode/opencode.json` (or `opencode.jsonc` — either works; the steps below say `opencode.jsonc` for brevity). Each step shows just the inner server entry; a complete merged example is shown at the end of step 10. v2 routes MCP tools through Code Mode by default — the entries here set `"codemode": false` to register tools directly, which the step-11 guidance and the agent `mcps` grants are written against.
+All MCP servers live under `"mcp"."servers"` in `~/.config/opencode/opencode.json` (or `opencode.jsonc` — either works; the steps below say `opencode.jsonc` for brevity). Each step shows just the inner server entry; a complete merged example is shown at the end of step 9. v2 routes MCP tools through Code Mode by default — the entries here set `"codemode": false` to register tools directly, which the step-10 guidance and the agent `mcps` grants are written against.
 
 ## 5. Add GitHub MCP
 
@@ -98,32 +98,7 @@ Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
 >
 > https://github.com/github/github-mcp-server/blob/main/docs/installation-guides/install-opencode.md
 
-## 6. Add W&B MCP
-
-Get your key at [wandb.ai/authorize](https://wandb.ai/authorize), then add the env var (same pattern as step 5):
-
-```bash
-export WANDB_API_KEY="your-wandb-key"
-```
-
-Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
-
-```jsonc
-"wandb": {
-  "type": "remote",
-  "url": "https://mcp.withwandb.com/mcp",
-  "oauth": false,
-  "codemode": false,
-  "headers": {
-    "Authorization": "Bearer {env:WANDB_API_KEY}",
-    "Accept": "application/json, text/event-stream"
-  }
-}
-```
-
-> https://github.com/wandb/wandb-mcp-server
-
-## 7. Add Context7 MCP
+## 6. Add Context7 MCP
 
 Get your key at [context7.com/dashboard](https://context7.com/dashboard), then add the env var:
 
@@ -148,7 +123,7 @@ Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
 
 > https://github.com/upstash/context7
 
-## 8. Websearch (built-in) & Z.AI Plan MCPs
+## 7. Websearch (built-in) & Z.AI Plan MCPs
 
 Websearch is an OpenCode built-in tool, enabled by default — no MCP entry. Providers: Exa, Firecrawl, Parallel, Tavily, TinyFish — to use Exa, export its key in your shell rc file (`~/.zshrc` on macOS, `~/.bashrc` on Linux):
 
@@ -201,7 +176,7 @@ Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
 
 > https://docs.bigmodel.cn/cn/coding-plan/mcp/search-mcp-server (mainland accounts: host is `open.bigmodel.cn`). The `Accept` header is required — omitting it returns HTTP 400. These endpoints rate-limit per account (`1302`/HTTP 429) independently of the quota windows — single lookups, not parallel fan-out.
 
-## 9. Add GitHub Code Search MCP
+## 8. Add GitHub Code Search MCP
 
 Also auto-provided by oh-my-opencode-slim. Adding it to `opencode.jsonc` is optional — shown here for reference, for explicit control. No auth required.
 
@@ -218,7 +193,7 @@ Add to `"mcp"."servers"` in `~/.config/opencode/opencode.jsonc`:
 
 > https://grep.app
 
-## 10. Add Hugging Face MCP
+## 9. Add Hugging Face MCP
 
 Create a read token at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens), then add the env var (same pattern as step 5):
 
@@ -258,16 +233,6 @@ After all MCP entries are added, the `"mcp"` block should look like:
         "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}",
         "X-MCP-Toolsets": "context,issues,pull_requests,repos,actions",
         "X-MCP-Readonly": "true"
-      }
-    },
-    "wandb": {
-      "type": "remote",
-      "url": "https://mcp.withwandb.com/mcp",
-      "oauth": false,
-      "codemode": false,
-      "headers": {
-        "Authorization": "Bearer {env:WANDB_API_KEY}",
-        "Accept": "application/json, text/event-stream"
       }
     },
     "context7": {
@@ -329,7 +294,7 @@ After all MCP entries are added, the `"mcp"` block should look like:
 }
 ```
 
-## 11. Add MCP usage guidance to AGENTS.md
+## 10. Add MCP usage guidance to AGENTS.md
 
 Add routing policy and session workflow to `~/.config/opencode/AGENTS.md` — MCP-over-CLI precedence, agent delegation, tool selection order, and stage-flow discipline; tool declarations and the preset config self-describe the rest:
 
@@ -345,7 +310,7 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 1. Local codebase → `rg`/`fd` first, then read.
 2. Library/dependency internals → local-first — check `~/gitlocal/<name>` first; uncloned → `zread`, else `gh`.
 3. Library docs → `context7` (via @librarian); usage examples → `gh_grep`.
-4. GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`; W&B → `wandb`.
+4. GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`.
 5. Everything else current/external → websearch / webfetch; `zai_search` / `zai_reader` for single lookups and CN sources.
 
 ## Workflow
@@ -361,7 +326,7 @@ Duties: plan, implement, verify. One session, one coherent change.
 
 > Trim payloads from contradicted and duplicated lines first — a line naming a concrete observed failure survives a trim; length alone is not the axis.
 
-## 12. Install personal skills (zhtmike/skills)
+## 11. Install personal skills (zhtmike/skills)
 
 ```bash
 mkdir -p ~/gitlocal ~/.config/opencode/skills
@@ -378,7 +343,7 @@ ln -sfn ~/gitlocal/skills/self-learn ~/.config/opencode/skills/self-learn
 
 > Symlinks keep a single source of truth: `git pull` in `~/gitlocal/skills` updates both skills everywhere. https://github.com/zhtmike/skills
 
-## 13. Apply the customized presets
+## 12. Apply the customized presets
 
 Replace `~/.config/opencode/oh-my-opencode-slim.json`:
 
@@ -391,16 +356,16 @@ Replace `~/.config/opencode/oh-my-opencode-slim.json`:
     "deepseek": {
       "orchestrator": { "model": "deepseek/deepseek-v4-pro", "variant": "max", "skills": ["*"], "mcps": ["*", "!context7"] },
       "oracle":       { "model": "deepseek/deepseek-v4-pro", "variant": "max", "skills": ["code-review"], "mcps": ["gh"] },
-      "librarian":    { "model": "deepseek/deepseek-flash", "variant": "low", "skills": [], "mcps": ["context7", "gh_grep", "gh", "hf", "wandb"] },
-      "explorer":     { "model": "deepseek/deepseek-flash", "variant": "low", "skills": [], "mcps": ["gh", "wandb"] },
+      "librarian":    { "model": "deepseek/deepseek-flash", "variant": "low", "skills": [], "mcps": ["context7", "gh_grep", "gh", "hf"] },
+      "explorer":     { "model": "deepseek/deepseek-flash", "variant": "low", "skills": [], "mcps": ["gh"] },
       "designer":     { "model": "deepseek/deepseek-flash", "variant": "high", "skills": ["coding-style"], "mcps": [] },
       "fixer":        { "model": "deepseek/deepseek-flash", "variant": "high", "skills": ["coding-style"], "mcps": [] }
     },
     "glm": {
       "orchestrator": { "model": "zai-coding-plan/glm-5.3", "variant": "max", "skills": ["*"], "mcps": ["*", "!context7"] },
       "oracle":       { "model": "zai-coding-plan/glm-5.3", "variant": "max", "skills": ["code-review"], "mcps": ["gh"] },
-      "librarian":    { "model": "zai-coding-plan/glm-5.3-flash", "variant": "low", "skills": [], "mcps": ["context7", "gh_grep", "gh", "hf", "wandb"] },
-      "explorer":     { "model": "zai-coding-plan/glm-5.3-flash", "variant": "low", "skills": [], "mcps": ["gh", "wandb"] },
+      "librarian":    { "model": "zai-coding-plan/glm-5.3-flash", "variant": "low", "skills": [], "mcps": ["context7", "gh_grep", "gh", "hf"] },
+      "explorer":     { "model": "zai-coding-plan/glm-5.3-flash", "variant": "low", "skills": [], "mcps": ["gh"] },
       "designer":     { "model": "zai-coding-plan/glm-5.3-flash", "variant": "high", "skills": ["coding-style"], "mcps": [] },
       "fixer":        { "model": "zai-coding-plan/glm-5.3-flash", "variant": "high", "skills": ["coding-style"], "mcps": [] }
     }
@@ -412,7 +377,7 @@ Replace `~/.config/opencode/oh-my-opencode-slim.json`:
 >
 > `variant` is the model's reasoning effort, and GLM-5.3 / DeepSeek expose exactly `low` / `high` / `max` — there is no `medium`. Variants tier with the job, main session stays `max`: `low` for lookup/recon (librarian, explorer), `high` for substantive-but-bounded work (designer, fixer), `max` for judgment (orchestrator, oracle). omo-slim's preset editor clears a variant the newly picked model doesn't expose — after re-picking models, re-check these values.
 
-## 14. Verify
+## 13. Verify
 
 ```bash
 source ~/.zshrc   # or ~/.bashrc on Linux

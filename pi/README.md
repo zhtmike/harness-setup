@@ -66,7 +66,7 @@ mkdir -p ~/.pi/agent
 }
 ```
 
-> Default glm-5.3, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.3 (fewer turns). Survey lanes pick flash per task except verdict-gating lanes (the default model), always with a thinking level — a lane pinning only a model inherits this `max` (step 13); the main session stays glm-5.3 (mid-session switches re-bill the cache). Image input is flash-only — the `images` column of `pi --list-models` marks glm-5.3 `no` and flash `yes`, so on glm-5.3 a `read` of an image returns only a "model does not support images" note; any session or dispatched lane that must see an image pins flash.
+> Default glm-5.3, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.3 (fewer turns). Survey lanes pick flash per task except verdict-gating lanes (the default model), always with a thinking level — a lane pinning only a model inherits this `max` (step 12); the main session stays glm-5.3 (mid-session switches re-bill the cache). Image input is flash-only — the `images` column of `pi --list-models` marks glm-5.3 `no` and flash `yes`, so on glm-5.3 a `read` of an image returns only a "model does not support images" note; any session or dispatched lane that must see an image pins flash.
 
 ## 3. Install skills
 
@@ -90,11 +90,11 @@ ln -sfn ~/gitlocal/skills/self-learn ~/.agents/skills/self-learn
 
 ## 4. Install CLI tools
 
-CLIs complement the MCP servers (steps 5–10): help output is read on demand — progressive disclosure, zero context overhead. Install priority: homebrew → conda-forge → PyPI/npm.
+CLIs complement the MCP servers (steps 5–9): help output is read on demand — progressive disclosure, zero context overhead. Install priority: homebrew → conda-forge → PyPI/npm.
 
 ```bash
 brew install gh node ripgrep fd jq fzf tree ast-grep coreutils
-conda install -c conda-forge wandb huggingface_hub            # fallback: pip install wandb huggingface_hub
+conda install -c conda-forge huggingface_hub            # fallback: pip install huggingface_hub
 ```
 
 > Toolbox: `rg` fast search · `fd` find · `jq` JSON · `fzf` fuzzy filter · `tree` directory overview · `ast-grep` structural search/replace · `timeout` (coreutils) bounds long-running commands.
@@ -103,13 +103,10 @@ Login each CLI (env vars are the non-interactive equivalent — enough to put th
 
 ```bash
 gh auth login           # or export GH_TOKEN="…"       (browser OAuth, or a read-only fine-grained PAT — see note)
-wandb login             # or export WANDB_API_KEY="…"   (wandb.ai/authorize)
 hf auth login           # or export HF_TOKEN="…"        (huggingface.co/settings/tokens)
 ```
 
 > `gh auth login`'s keyring credential is an OAuth token with account-wide scopes — the machine's write credential, working where organizations block classic PATs. Keep it on personal single-user machines only. Where shared servers and cluster nodes need gh, give it a read-only ceiling instead: `export GH_TOKEN=<YOUR_READONLY_PAT>` with a fine-grained PAT in the same read-only shape as step 5's — reads work, writes fail at the credential.
-
-> The `wandb` CLI cannot query runs — use the `wandb` MCP (step 6) or REST API with curl. Web/docs: `websearch` MCP (step 8) or curl.
 
 ## 5. Add GitHub MCP
 
@@ -141,28 +138,7 @@ Add to the `mcpServers` object in `~/.pi/agent/mcp.json`:
 > All toolsets register — with the default `codemode` exposure tools never enter context, so the full tool surface costs nothing upfront. Keep `X-MCP-Readonly`: pi runs without permission prompts, and this keeps the GitHub MCP read-only as a guardrail. A fine-grained read-only PAT makes the credential itself read-only too.
 > https://github.com/github/github-mcp-server/blob/main/docs/installation-guides/install-opencode.md
 
-## 6. Add W&B MCP
-
-Get your key at [wandb.ai/authorize](https://wandb.ai/authorize), then add the env var (same pattern as step 5):
-
-```bash
-export WANDB_API_KEY="your-wandb-key"
-```
-
-```json
-"wandb": {
-  "url": "https://mcp.withwandb.com/mcp",
-  "headers": {
-    "Authorization": "Bearer ${WANDB_API_KEY}",
-    "Accept": "application/json, text/event-stream"
-  },
-  "description": "Weights & Biases — runs, metrics, artifacts, Weave traces, evaluations"
-}
-```
-
-> https://github.com/wandb/wandb-mcp-server
-
-## 7. Add Context7 MCP
+## 6. Add Context7 MCP
 
 Get your key at [context7.com/dashboard](https://context7.com/dashboard), then add the env var (same pattern as step 5):
 
@@ -183,7 +159,7 @@ export CONTEXT7_API_KEY="your-context7-key"
 
 > https://github.com/upstash/context7
 
-## 8. Add Websearch & Z.AI Plan MCPs
+## 7. Add Websearch & Z.AI Plan MCPs
 
 Get your key at [exa.ai](https://exa.ai), then add the env var (same pattern as step 5):
 
@@ -235,7 +211,7 @@ The Z.AI Coding Plan (step 2) bundles three remote MCPs — no extra keys, they 
 
 > https://docs.bigmodel.cn/cn/coding-plan/mcp/search-mcp-server (mainland accounts: host is `open.bigmodel.cn`). The `Accept` header is required — omitting it returns HTTP 400. These endpoints rate-limit per account (`1302`/HTTP 429) independently of the quota windows: single lookups only — parallel `survey` fan-out stays on `websearch`.
 
-## 9. Add GitHub Code Search MCP
+## 8. Add GitHub Code Search MCP
 
 No auth required:
 
@@ -248,7 +224,7 @@ No auth required:
 
 > https://grep.app
 
-## 10. Add Hugging Face MCP
+## 9. Add Hugging Face MCP
 
 Create a read token at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens), then add the env var (same pattern as step 5):
 
@@ -280,14 +256,6 @@ After all MCP entries are added, `~/.pi/agent/mcp.json` should look like:
         "X-MCP-Readonly": "true"
       },
       "description": "GitHub — issues, PRs, repos, commits, CI (read-only)"
-    },
-    "wandb": {
-      "url": "https://mcp.withwandb.com/mcp",
-      "headers": {
-        "Authorization": "Bearer ${WANDB_API_KEY}",
-        "Accept": "application/json, text/event-stream"
-      },
-      "description": "Weights & Biases — runs, metrics, artifacts, Weave traces, evaluations"
     },
     "context7": {
       "url": "https://mcp.context7.com/mcp",
@@ -346,20 +314,20 @@ After all MCP entries are added, `~/.pi/agent/mcp.json` should look like:
 > Header and env values expand `${VAR}`. `sse` entries are rejected; SSE-only servers usually expose streamable HTTP at `/mcp`. OAuth servers need no credentials: put the URL in, then `/mcp login <server>`.
 > Manage from the shell: `pi mcp add|remove|list|login|logout`; `/mcp` in-session; `/reload` after edits; logs in `~/.pi/agent/mcp.log`.
 
-Verify all nine connect (exits 1 unless every enabled server connects):
+Verify all eight connect (exits 1 unless every enabled server connects):
 
 ```bash
 source ~/.zshrc && pi mcp list
 ```
 
-## 11. Codemode
+## 10. Codemode
 
 MCP, `tool_search`, and codemode are built in. The servers above use the default `codemode` exposure, which activates codemode automatically — no settings entry required (disable with `autoEnableCodemode: false` in `mcp.json`). Tools never enter context; servers appear as one-liners in an `mcp_servers` system-prompt section (fed by the `description` field). Opt a server into `deferred` to get `tool_search` (loaded tools stay declared on that transcript branch); `direct` declares all ~84 tool schemas in every request; `hidden` registers but blocks access. Promote a single hot tool to direct calls with `toolExposure` (a per-server key in `mcp.json`). MCP connections never bust the prompt cache, but each newly declared tool re-bills the prefix once (tool schemas precede messages).
 > Codemode runs one model-written JavaScript script (QuickJS sandbox — no fs/network, tools only) whose parallel calls and filtered output are all that reach the context: inside scripts, bash holds up to 1 MiB and MCP results arrive untruncated (direct calls: 50 KB / 20 KB middle-elided). Scripts reach every server's tools via `searchTools()` / `describeNamespace()`.
 > In codemode scripts, MCP results arrive as `{content:[{type,text}]}` envelopes with JSON-string text — join the parts and `JSON.parse`.
 > Keep `codemode.mode` at the default `"on"` — direct tool calls stay available; scripts are an extra lane for fan-out. `"only"` hides all other tools — avoid with glm-5.3. `codemode.inlineBudget` (default 3000) caps tool declarations in the codemode description.
 
-## 12. Install the dispatch extension
+## 11. Install the dispatch extension
 
 ```bash
 pi install npm:@zhtmike/pi-minimal-dispatch
@@ -368,7 +336,7 @@ cat > ~/.pi/agent/pi-minimal-dispatch.json <<'EOF'
 EOF
 ```
 
-> Writes the `packages` entry into `~/.pi/agent/settings.json` (shown in step 2's payload) and the package into `~/.pi/agent/npm/`. `pi-minimal-dispatch` provides the `dispatch`/`lanes` tools the Dispatch section (step 13) runs on: detached lanes that survive the session, derived state, a bounded `lanes wait` action, parentless deadline leash, manifest re-adoption, wave `release` with dispatcher ownership (kill and release refuse a live foreign owner); requires pi ≥ 1.4.0. Update with `pi update --extensions`, remove with `pi remove npm:@zhtmike/pi-minimal-dispatch`; the git source (`pi install git:github.com/zhtmike/pi-minimal-dispatch`) tracks main between releases. The config write sets `maxDefaultLanes` — the retired ≤-3 clause's rule, now a tool-enforced cap; the package's `docs/api.md` (`#configuration`) carries the semantics. If the tools ever go missing, the retired bash template is recoverable: `git log -S 'nohup sh -c' -- pi/README.md`.
+> Writes the `packages` entry into `~/.pi/agent/settings.json` (shown in step 2's payload) and the package into `~/.pi/agent/npm/`. `pi-minimal-dispatch` provides the `dispatch`/`lanes` tools the Dispatch section (step 12) runs on: detached lanes that survive the session, derived state, a bounded `lanes wait` action, parentless deadline leash, manifest re-adoption, wave `release` with dispatcher ownership (kill and release refuse a live foreign owner); requires pi ≥ 1.4.0. Update with `pi update --extensions`, remove with `pi remove npm:@zhtmike/pi-minimal-dispatch`; the git source (`pi install git:github.com/zhtmike/pi-minimal-dispatch`) tracks main between releases. The config write sets `maxDefaultLanes` — the retired ≤-3 clause's rule, now a tool-enforced cap; the package's `docs/api.md` (`#configuration`) carries the semantics. If the tools ever go missing, the retired bash template is recoverable: `git log -S 'nohup sh -c' -- pi/README.md`.
 
 Then the personal gate package (checkout claim, git/gh approval floors, review scaffolds — it replaces the workflow payload's checkout-claim bullet and the commit/conversation gates' mechanical halves). The skills stay tool-agnostic — the wiring lives here: commit-gate's commit/push flows run through `commit`/`bind`/`approve` and the floors, code-review's texts come back from `review`, conversation-gate's PR draft file comes from `draft`:
 
@@ -384,7 +352,7 @@ EOF
 
 > Same overlay rules as pi's settings (defaults → agent dir → project `.pi/pi-kit.json`). **`ownerLogins` is yours** — put your own GitHub login there: it gates `git push` (owner-checked under any allow), and a copied login means every push of yours refuses. Keep `standingAllows` empty unless you consciously opt in: an entry like `{ "repo": "*", "shapes": ["commit", "push", "pr", "comment", "tag", "release"] }` pre-approves every ask shape on every repo (this machine's owner runs it — ask-tier dialogs disappear for agent-typed git/gh; every ask shape also offers "Approve for this session"), while destructive and refuse rows stay gated by design either way. Per-repo entries are the tamer form. The shape names are the gate-action vocabulary — same words `approve` records. Semantics: the repo's `docs/api.md`. Update with `pi update --extensions`. A bad config file fences every gated op and aborts the session at startup — fix the file, restart.
 
-## 13. Add usage guidance to AGENTS.md
+## 12. Add usage guidance to AGENTS.md
 
 `~/.pi/agent/AGENTS.md`:
 
@@ -399,14 +367,14 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 
 1. Local codebase → `rg`/`fd` first, then read; `ast-grep` for structural queries.
 2. Library/dependency internals → local-first — check `~/gitlocal/<name>` first; uncloned → `zread`, else `gh`.
-3. Library docs → `context7`; usage examples → `gh_grep`; GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`; W&B → `wandb`.
+3. Library docs → `context7`; usage examples → `gh_grep`; GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`.
 4. Everything else current/external → `websearch` for parallel fan-out, `zai_search`/`zai_reader` for single lookups and CN sources; curl via bash as fallback.
 
 ## Dispatch — sub-tasks via fresh pi instances
 
-- Dispatch when a sub-task deserves its own context: read-only exploration before implementing, parallel investigation lanes. Parallel research is the one blessed parallel pattern.
+- Dispatch when a sub-task deserves its own context: read-only exploration before implementing, parallel investigation lanes. Parallel research is the one blessed parallel pattern; implementation is never dispatched in parallel.
 - Briefs carry everything — goal, scope, expected deliverable and format, what not to do — and state that the addressee is a dispatched leaf; the cheaper the lane, the fuller the brief: fast-model lanes execute plans, not goals — decomposition and judgment calls live in the brief.
-- Tier with the job; pin model + thinking together at spawn, never mid-session: mechanical recon on the fast model (the non-default entry of `enabledModels` in `~/.pi/agent/settings.json`) at low thinking, substantive investigation on fast at high, judgment and verdict work on the default model at high or maximum thinking. An image-reading task pins a vision-capable model (`pi --list-models`'s `images` column). Never pin the fast model bare. A rate-limited provider runs lanes sequentially.
+- Tier with the job; pin model + thinking together at spawn, never mid-session: mechanical recon on the fast model (the non-default entry of `enabledModels` in `~/.pi/agent/settings.json`) at low thinking, substantive investigation on fast at high, judgment and verdict work on the default model at high or maximum thinking. An image-reading task pins a vision-capable model (`pi --list-models`'s `images` column). Never pin the fast model bare. A provider whose lanes fail on rate limits runs them sequentially.
 - A write-capable lane writes data artifacts only, under the dispatcher's claim.
 ```
 
@@ -430,7 +398,7 @@ Duties: plan, implement, verify. One session, one coherent change.
 
 > The isolation rules exist because concurrent sessions in one repo share `.pi/work` and the checkout: session dirs namespace scratch (the full session id — a uuidv7 prefix is a ~65 s timestamp window that collides for concurrent sessions), `release` is the only wave cleanup, and pi-kit's `checkout` claim keeps one editor per checkout (a second task takes `checkout`'s worktree). Refusals met there are by design — never worked around.
 
-## 14. Verify
+## 13. Verify
 
 ```bash
 source ~/.zshrc && pi
@@ -439,8 +407,8 @@ source ~/.zshrc && pi
 In pi and the shell:
 
 1. `/model` → zai/glm-5.3; `Shift+Tab` → max; `Ctrl+S` to save.
-2. `/mcp` → all nine servers connected (or `pi mcp list` from the shell); `pi list` → `npm:@zhtmike/pi-minimal-dispatch` and `git:github.com/zhtmike/pi-kit` installed (dispatch/lanes + the six pi-kit tools load).
-3. "Run `gh auth status`" → authenticated — keyring with `Token scopes: 'repo, …'` (env-token setups show their own scopes). Same for `hf auth whoami` and `wandb status`.
+2. `/mcp` → all eight servers connected (or `pi mcp list` from the shell); `pi list` → `npm:@zhtmike/pi-minimal-dispatch` and `git:github.com/zhtmike/pi-kit` installed (dispatch/lanes + the six pi-kit tools load).
+3. "Run `gh auth status`" → authenticated — keyring with `Token scopes: 'repo, …'` (env-token setups show their own scopes). Same for `hf auth whoami`.
 4. "List your skills" → code-review, coding-style, spike, propose, commit-gate, conversation-gate, survey, self-learn.
 5. Smoke test: `/skill:survey <small topic>` → investigation lanes dispatched per the Dispatch section, one synthesized answer; "review this diff" → a single dispatched reviewer; `checkout` (action `status`) → the claim stamp state.
 
