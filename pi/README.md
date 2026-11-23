@@ -47,10 +47,50 @@ Check models:
 source ~/.zshrc && pi --list-models zai
 ```
 
-> `glm-5.3` / `glm-5.3-flash` are in pi's model catalog (refreshed from pi.dev), so no manual model declarations. If a future GLM release outpaces the catalog, declare it in `~/.pi/agent/models.json`.
+> `glm-5.3-flash` is in pi's model catalog (refreshed from pi.dev); `glm-5.4` currently outpaces the catalog — declare it manually, and drop the declaration once `pi update --models && pi --list-models` lists it (the catalog entry then carries pricing too).
 
 ```bash
 mkdir -p ~/.pi/agent
+```
+
+`~/.pi/agent/models.json` — declares `glm-5.4` until the catalog catches up:
+
+```json
+{
+  "providers": {
+    "zai": {
+      "models": [
+        {
+          "id": "glm-5.4",
+          "name": "GLM-5.4",
+          "api": "openai-completions",
+          "baseUrl": "https://api.z.ai/api/coding/paas/v4",
+          "reasoning": true,
+          "input": ["text"],
+          "contextWindow": 1000000,
+          "maxTokens": 131072,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          },
+          "compat": {
+            "supportsStore": false,
+            "supportsReasoningEffort": true,
+            "maxTokensField": "max_tokens",
+            "thinkingFormat": "zai",
+            "supportsStrictMode": true,
+            "zaiToolStream": true
+          }
+        }
+      ]
+    }
+  }
+}
 ```
 
 `~/.pi/agent/settings.json`:
@@ -58,15 +98,15 @@ mkdir -p ~/.pi/agent
 ```json
 {
   "defaultProvider": "zai",
-  "defaultModel": "glm-5.3",
+  "defaultModel": "glm-5.4",
   "defaultThinkingLevel": "max",
-  "enabledModels": ["zai/glm-5.3", "zai/glm-5.3-flash"],
+  "enabledModels": ["zai/glm-5.4", "zai/glm-5.3-flash"],
   "showCacheMissNotices": true,
   "packages": ["npm:@zhtmike/pi-minimal-dispatch", "git:github.com/zhtmike/pi-kit"]
 }
 ```
 
-> Default glm-5.3, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.3 (fewer turns). Survey lanes pick flash per task except verdict-gating lanes (the default model), always with a thinking level — a lane pinning only a model inherits this `max` (step 12); the main session stays glm-5.3 (mid-session switches re-bill the cache). Image input is flash-only — the `images` column of `pi --list-models` marks glm-5.3 `no` and flash `yes`, so on glm-5.3 a `read` of an image returns only a "model does not support images" note; any session or dispatched lane that must see an image pins flash.
+> Default glm-5.4, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.4 (fewer turns). Survey lanes pick flash per task except verdict-gating lanes (the default model), always with a thinking level — a lane pinning only a model inherits this `max` (step 12); the main session stays glm-5.4 (mid-session switches re-bill the cache). Image input is flash-only — the `images` column of `pi --list-models` marks glm-5.4 `no` and flash `yes` (no 5.4 flash exists yet, so flash is glm-5.3-flash), so on glm-5.4 a `read` of an image returns only a "model does not support images" note; any session or dispatched lane that must see an image pins flash.
 
 ## 3. Install skills
 
@@ -325,7 +365,7 @@ source ~/.zshrc && pi mcp list
 MCP, `tool_search`, and codemode are built in. The servers above use the default `codemode` exposure, which activates codemode automatically — no settings entry required (disable with `autoEnableCodemode: false` in `mcp.json`). Tools never enter context; servers appear as one-liners in an `mcp_servers` system-prompt section (fed by the `description` field). Opt a server into `deferred` to get `tool_search` (loaded tools stay declared on that transcript branch); `direct` declares all ~84 tool schemas in every request; `hidden` registers but blocks access. Promote a single hot tool to direct calls with `toolExposure` (a per-server key in `mcp.json`). MCP connections never bust the prompt cache, but each newly declared tool re-bills the prefix once (tool schemas precede messages).
 > Codemode runs one model-written JavaScript script (QuickJS sandbox — no fs/network, tools only) whose parallel calls and filtered output are all that reach the context: inside scripts, bash holds up to 1 MiB and MCP results arrive untruncated (direct calls: 50 KB / 20 KB middle-elided). Scripts reach every server's tools via `searchTools()` / `describeNamespace()`.
 > In codemode scripts, MCP results arrive as `{content:[{type,text}]}` envelopes with JSON-string text — join the parts and `JSON.parse`.
-> Keep `codemode.mode` at the default `"on"` — direct tool calls stay available; scripts are an extra lane for fan-out. `"only"` hides all other tools — avoid with glm-5.3. `codemode.inlineBudget` (default 3000) caps tool declarations in the codemode description.
+> Keep `codemode.mode` at the default `"on"` — direct tool calls stay available; scripts are an extra lane for fan-out. `"only"` hides all other tools — avoid with glm-5.4. `codemode.inlineBudget` (default 3000) caps tool declarations in the codemode description.
 
 ## 11. Install the dispatch extension
 
@@ -407,7 +447,7 @@ source ~/.zshrc && pi
 
 In pi and the shell:
 
-1. `/model` → zai/glm-5.3; `Shift+Tab` → max; `Ctrl+S` to save.
+1. `/model` → zai/glm-5.4; `Shift+Tab` → max; `Ctrl+S` to save.
 2. `/mcp` → all eight servers connected (or `pi mcp list` from the shell); `pi list` → `npm:@zhtmike/pi-minimal-dispatch` and `git:github.com/zhtmike/pi-kit` installed (dispatch/lanes + the six pi-kit tools load).
 3. "Run `gh auth status`" → authenticated — keyring with `Token scopes: 'repo, …'` (env-token setups show their own scopes). Same for `hf auth whoami`.
 4. "List your skills" → code-review, coding-style, spike, propose, commit-gate, conversation-gate, survey, self-learn.
