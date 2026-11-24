@@ -102,9 +102,12 @@ mkdir -p ~/.pi/agent
   "defaultThinkingLevel": "max",
   "enabledModels": ["zai/glm-5.4", "zai/glm-5.3-flash"],
   "showCacheMissNotices": true,
+  "retry": { "maxRetries": 10 },
   "packages": ["npm:@zhtmike/pi-minimal-dispatch", "git:github.com/zhtmike/pi-kit"]
 }
 ```
+
+> `retry.maxRetries` raises pi's automatic retry on transient errors (overloaded, rate limit, 5xx) from the stock `3` to `10`. Z.AI's coding endpoint sheds load in `429 {"code":"1305"}` bursts ("The service may be temporarily overloaded"): a rejection returns in about half a second with no `Retry-After`, and within a burst the next attempt succeeds about as often as it fails whether it comes seconds or tens of seconds later — getting through takes more attempts, not longer waits. The stock 2/4/8 s budget (14 s) gives up mid-burst and ends the turn with `Retry failed after 3 attempts: 429 …`; ten retries back off 2, 4, 8, 16, 32, then 60 s per step (about 6 min worst case — `Esc` aborts) against a longest observed streak of nine rejections. Lanes read the same file and inherit it. Keep `retry.provider.maxRetries` at `0` — provider-level retries would also re-send plan-limit `1308` responses, which must fail fast.
 
 > Default glm-5.4, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.4 (fewer turns). Survey lanes pick flash per task except verdict-gating lanes (the default model), always with a thinking level — a lane pinning only a model inherits this `max` (step 12); the main session stays glm-5.4 (mid-session switches re-bill the cache). Image input is flash-only — the `images` column of `pi --list-models` marks glm-5.4 `no` and flash `yes` (no 5.4 flash exists yet, so flash is glm-5.3-flash), so on glm-5.4 a `read` of an image returns only a "model does not support images" note; any session or dispatched lane that must see an image pins flash.
 
