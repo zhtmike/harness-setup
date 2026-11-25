@@ -58,7 +58,7 @@ opencode models
 npx oh-my-opencode-slim@latest install
 ```
 
-This generates `opencode.json` (or `opencode.jsonc` if one already exists), `tui.json`, and `oh-my-opencode-slim.json` with stock presets. Replace `~/.config/opencode/oh-my-opencode-slim.json` with the customized version below (step 12).
+This generates `opencode.json` (or `opencode.jsonc` if one already exists) and `oh-my-opencode-slim.json` with stock presets. Replace `~/.config/opencode/oh-my-opencode-slim.json` with the customized version below (step 12).
 
 oh-my-opencode-slim auto-provides **context7** and **gh_grep** — add them to `opencode.jsonc` only for API-key auth (context7) or visibility (gh_grep). **Websearch** is an OpenCode built-in tool (step 7); the **Z.AI plan MCPs** (step 7), **gh**, and **hf** always need explicit config.
 

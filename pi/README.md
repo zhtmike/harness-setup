@@ -47,7 +47,7 @@ Check models:
 source ~/.zshrc && pi --list-models zai
 ```
 
-> `glm-5.3-flash` is in pi's model catalog (refreshed from pi.dev); `glm-5.4` currently outpaces the catalog — declare it manually, and drop the declaration once `pi update --models && pi --list-models` lists it (the catalog entry then carries pricing too).
+> `glm-5.3-flash` and `glm-5.4` are both in pi's model catalog (refreshed from pi.dev) — no `models.json` declaration is needed; `pi update --models` refreshes the catalog.
 
 DeepSeek platform (pay-as-you-go) — get your key at https://platform.deepseek.com/api_keys, add to the same shell rc file:
 
@@ -59,50 +59,10 @@ export DEEPSEEK_API_KEY="your-deepseek-platform-key"
 source ~/.zshrc && pi --list-models deepseek
 ```
 
-> The catalog already carries `deepseek-v4-pro` and `deepseek-flash` — no models.json entry needed (both refresh with `pi update --models`).
+> The catalog already carries `deepseek-v4-pro` and `deepseek-flash` — both refresh with `pi update --models`.
 
 ```bash
 mkdir -p ~/.pi/agent
-```
-
-`~/.pi/agent/models.json` — declares `glm-5.4` until the catalog catches up:
-
-```json
-{
-  "providers": {
-    "zai": {
-      "models": [
-        {
-          "id": "glm-5.4",
-          "name": "GLM-5.4",
-          "api": "openai-completions",
-          "baseUrl": "https://api.z.ai/api/coding/paas/v4",
-          "reasoning": true,
-          "input": ["text"],
-          "contextWindow": 1000000,
-          "maxTokens": 131072,
-          "thinkingLevelMap": {
-            "off": null,
-            "minimal": null,
-            "low": "low",
-            "medium": null,
-            "high": "high",
-            "xhigh": null,
-            "max": "max"
-          },
-          "compat": {
-            "supportsStore": false,
-            "supportsReasoningEffort": true,
-            "maxTokensField": "max_tokens",
-            "thinkingFormat": "zai",
-            "supportsStrictMode": true,
-            "zaiToolStream": true
-          }
-        }
-      ]
-    }
-  }
-}
 ```
 
 `~/.pi/agent/settings.json`:
