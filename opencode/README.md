@@ -307,19 +307,20 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 
 ### Tool selection order
 
-1. Local codebase → `rg`/`fd` first, then read.
+1. Local codebase → the repo's typechecker/linter first for callers, types, dead code; then `rg`/`fd` + read; `ast-grep` for structural queries — scope searches to the repo or known subtrees; outside sweeps and unscoped globs are out.
 2. Library/dependency internals → local-first — check `~/gitlocal/<name>` first; uncloned → `zread`, else `gh`.
 3. Library docs → `context7` (via @librarian); usage examples → `gh_grep`.
 4. GitHub issues/PRs/CI → `gh`; papers and Hub lookups → `hf`.
-5. Everything else current/external → websearch / webfetch; `zai_search` / `zai_reader` for single lookups and CN sources.
+5. Everything else current/external → websearch / webfetch for parallel fan-out; `zai_search` / `zai_reader` for single lookups and CN sources.
 
 ## Workflow
 
 Duties: plan, implement, verify. One session, one coherent change.
 
 - Context gathering: delegate to read-only subagents — @librarian for docs and research, @explorer for repo recon, @oracle for verdicts — findings return to the session's own context, no artifact file, no fresh session; parallel research is fine, implementation keeps one writer.
-- Image input needs a vision-capable model — the session model may take none; delegate anything that must see an image to a vision-capable agent rather than reporting it unread.
-- Stage flow: one task proceeds through its stages — investigate, design, prove, finish, gate the commit — without asking to continue between stages; the asks are design acceptance, external actions, and genuine unresolvable ambiguity. A subagent returning its findings is a stage boundary, not a stop — the session continues without asking.
+- Image input needs a vision-capable model — the session model may take none; delegate anything that must see an image to a vision-capable agent from the same family as the session model rather than reporting it unread.
+- Stage flow: one task proceeds through its stages — investigate, design, prove, finish, gate each commit — without asking to continue between stages; the asks are design acceptance, external actions, and genuine unresolvable ambiguity. A subagent returning its findings is a stage boundary, not a stop — the session continues without asking.
+- At a stage boundary with heavily loaded context — before finishing or gate passes after heavy exploration — compact and resume in a fresh session.
 - Stage completion is not task wind-down: wind down only when the task is settled — delivered and verified, nothing pending on the session — or when the session ends with it unmet.
 - A session ends with its loops closed: every open item is done, blocked with the blocker named, or handed to the user as a decision — agent deferral without a blocker is not a finish.
 - No preamble, no flattery, honest pushback — verdicts flip only on named new evidence, never on mere pushback; an owner's call gets at most one course-correction, then deference; "no action needed" is terminal — re-asking is not evidence.
@@ -376,7 +377,7 @@ Replace `~/.config/opencode/oh-my-opencode-slim.json`:
 
 > When omo-slim updates its stock defaults, re-run step 4 then re-apply this config.
 >
-> `variant` is the model's reasoning effort, and the GLM / DeepSeek models here expose exactly `low` / `high` / `max` — there is no `medium`. No glm-5.4 flash exists yet, so flash roles stay on glm-5.3-flash. Variants tier with the job, main session stays `max`: `low` for lookup/recon (librarian, explorer), `high` for substantive-but-bounded work (designer, fixer), `max` for judgment (orchestrator, oracle). omo-slim's preset editor clears a variant the newly picked model doesn't expose — after re-picking models, re-check these values.
+> `variant` is the model's reasoning effort, and the GLM / DeepSeek models here expose exactly `low` / `high` / `max` — there is no `medium`. Flash roles pair within a family: deepseek-v4-pro ↔ deepseek-flash, glm-5.4 ↔ glm-5.3-flash (no glm-5.4 flash exists yet) — never cross-pair a preset's flash roles. Variants tier with the job, main session stays `max`: `low` for lookup/recon (librarian, explorer), `high` for substantive-but-bounded work (designer, fixer), `max` for judgment (orchestrator, oracle). omo-slim's preset editor clears a variant the newly picked model doesn't expose — after re-picking models, re-check these values.
 
 ## 13. Verify
 

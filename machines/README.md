@@ -13,7 +13,7 @@ ln -sfn ~/gitlocal/harness-setup/machines/macbook.md ~/AGENTS.md
 Non-default local state (default values are never recorded):
 
 - pi `~/.pi/agent/settings.json` carries `hideThinkingBlock: true` beyond the guide payload.
-- `~/.zshrc` wraps `pi`: bare `pi --list-models` keeps only the `zai` provider's rows (`awk 'NR==1 || $1=="zai"'` over the full listing) — pi ships a built-in huggingface provider (HF Router) whose ~90 catalog rows print regardless of auth, and the fuzzy search cannot exclude them (`zai` matches `zai-org/*`). `command pi --list-models` or any explicit search arg bypasses.
+- `~/.zshrc` wraps `pi`: bare `pi --list-models` keeps only the `zai` and `deepseek` providers' rows (`awk 'NR==1 || $1=="zai" || $1=="deepseek"'` over the full listing) — pi ships a built-in huggingface provider (HF Router) whose ~90 catalog rows print regardless of auth, and the fuzzy search cannot exclude them (`zai` matches `zai-org/*`). `command pi --list-models` or any explicit search arg bypasses.
 - `~/.ssh/config` routes `github.com` through `ssh.github.com:443` — this network blocks ssh port 22, so every git push fails without the reroute.
 
 ## Support scripts

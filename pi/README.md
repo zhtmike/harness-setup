@@ -33,9 +33,9 @@ pi --version
 >
 > Ghostty supports OSC 52 out of the box. Pasting into pi needs no OSC 52 — the terminal's normal paste (`Cmd+V`) types through ssh into pi's editor. Probe from the remote host: `printf '\033]52;c;%s\007' "$(printf 'clipboard-ok' | base64)"` — `clipboard-ok` pasteable on the Mac means pi's copy keys land too.
 
-## 2. Configure provider (Z.AI Coding Plan)
+## 2. Configure providers (Z.AI Coding Plan, DeepSeek)
 
-Get your key at https://z.ai/manage-apikey/account. Add to your shell rc file (`~/.zshrc` on macOS, `~/.bashrc` on Linux):
+Get your Z.AI key at https://z.ai/manage-apikey/account. Add to your shell rc file (`~/.zshrc` on macOS, `~/.bashrc` on Linux):
 
 ```bash
 export ZAI_API_KEY="your-zai-coding-plan-key"
@@ -48,6 +48,18 @@ source ~/.zshrc && pi --list-models zai
 ```
 
 > `glm-5.3-flash` is in pi's model catalog (refreshed from pi.dev); `glm-5.4` currently outpaces the catalog — declare it manually, and drop the declaration once `pi update --models && pi --list-models` lists it (the catalog entry then carries pricing too).
+
+DeepSeek platform (pay-as-you-go) — get your key at https://platform.deepseek.com/api_keys, add to the same shell rc file:
+
+```bash
+export DEEPSEEK_API_KEY="your-deepseek-platform-key"
+```
+
+```bash
+source ~/.zshrc && pi --list-models deepseek
+```
+
+> The catalog already carries `deepseek-v4-pro` and `deepseek-flash` — no models.json entry needed (both refresh with `pi update --models`).
 
 ```bash
 mkdir -p ~/.pi/agent
@@ -100,7 +112,7 @@ mkdir -p ~/.pi/agent
   "defaultProvider": "zai",
   "defaultModel": "glm-5.4",
   "defaultThinkingLevel": "max",
-  "enabledModels": ["zai/glm-5.4", "zai/glm-5.3-flash"],
+  "enabledModels": ["zai/glm-5.4", "zai/glm-5.3-flash", "deepseek/deepseek-v4-pro", "deepseek/deepseek-flash"],
   "showCacheMissNotices": true,
   "retry": { "maxRetries": 10 },
   "packages": ["npm:@zhtmike/pi-minimal-dispatch", "git:github.com/zhtmike/pi-kit"]
@@ -109,7 +121,7 @@ mkdir -p ~/.pi/agent
 
 > `retry.maxRetries` raises pi's automatic retry on transient errors (overloaded, rate limit, 5xx) from the stock `3` to `10`. Z.AI's coding endpoint sheds load in `429 {"code":"1305"}` bursts ("The service may be temporarily overloaded"): a rejection returns in about half a second with no `Retry-After`, and within a burst the next attempt succeeds about as often as it fails whether it comes seconds or tens of seconds later — getting through takes more attempts, not longer waits. The stock 2/4/8 s budget (14 s) gives up mid-burst and ends the turn with `Retry failed after 3 attempts: 429 …`; ten retries back off 2, 4, 8, 16, 32, then 60 s per step (about 6 min worst case — `Esc` aborts) against a longest observed streak of nine rejections. Lanes read the same file and inherit it. Keep `retry.provider.maxRetries` at `0` — provider-level retries would also re-send plan-limit `1308` responses, which must fail fast.
 
-> Default glm-5.4, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on glm-5.4 (fewer turns). Survey lanes pick flash per task except verdict-gating lanes (the default model), always with a thinking level — a lane pinning only a model inherits this `max` (step 12); the main session stays glm-5.4 (mid-session switches re-bill the cache). Image input is flash-only — the `images` column of `pi --list-models` marks glm-5.4 `no` and flash `yes` (no 5.4 flash exists yet, so flash is glm-5.3-flash), so on glm-5.4 a `read` of an image returns only a "model does not support images" note; any session or dispatched lane that must see an image pins flash.
+> Default glm-5.4, thinking max at startup (`defaultThinkingLevel` — `Shift+Tab` cycles it mid-session). Flash is for recon/speed — complex multi-step work often finishes cheaper on the pro model (fewer turns). Pairs stay within a family: glm-5.4 ↔ glm-5.3-flash, deepseek-v4-pro ↔ deepseek-flash — pick the flash model from the same family as the main model, never cross-pair (a deepseek session's flash is deepseek-flash, not glm-5.3-flash). Survey lanes pick flash per task except verdict-gating lanes (the default model), always with a thinking level — a lane pinning only a model inherits this `max` (step 12); the main session stays glm-5.4 (mid-session switches re-bill the cache). Image input is flash-only — the `images` column of `pi --list-models` marks glm-5.4 and deepseek-v4-pro `no`, glm-5.3-flash and deepseek-flash `yes` (no 5.4 flash exists yet, so the glm pair's flash is glm-5.3-flash), so on a pro model a `read` of an image returns only a "model does not support images" note; any session or dispatched lane that must see an image pins its family's flash.
 
 ## 3. Install skills
 
@@ -417,7 +429,7 @@ When two loaded layers conflict, the nearer-the-work layer's policy wins; a fart
 
 - Dispatch is the default for self-contained sub-tasks — localized edits with known targets stay inline; the main session keeps judgment and the gates. Research fans out in parallel; implementation dispatches one lane at a time, eligible when its contract serializes whole: spec, file scope, and acceptance checks fit one brief — the lane makes no decision the brief could have made.
 - Briefs carry everything — goal, scope, deliverable format, what not to do — and name the addressee a dispatched leaf; a lane running tests gets the covering subset in its brief; fast-model lanes execute plans, not goals — decomposition and judgment live in the brief.
-- Tier with the job; pin model + thinking together at spawn, never mid-session: mechanical recon — fast at low thinking; substantive investigation and routine implementation — fast at high or maximum; review lanes — fast at maximum first round, default model earned by design-grade artifacts, unsettleable reads, or blocking findings; complex implementation and other judgment work — default at high or maximum. Fast model = the cheapest `enabledModels` entry. An image-reading task pins a vision-capable model (`pi --list-models`'s `images` column). Never pin the fast model bare.
+- Tier with the job; pin model + thinking together at spawn, never mid-session: mechanical recon — fast at low thinking; substantive investigation and routine implementation — fast at high or maximum; review lanes — fast at maximum first round, default model earned by design-grade artifacts, unsettleable reads, or blocking findings; complex implementation and other judgment work — default at high or maximum. Fast model = the cheapest `enabledModels` entry from the same family as the main model. An image-reading task pins a vision-capable model from the same family as the main model (`pi --list-models`'s `images` column). Never pin the fast model bare.
 - Non-implementation write lanes write data artifacts only, under the dispatcher's claim. An implementation lane edits only inside a dispatcher-assigned worktree, writes only dispatcher-assigned artifacts (patch + report) named in its final message, carries the finishing-pass body by path in its brief, and finishes inside the worktree; the parent inspects, applies, verifies independently, and carries that body into the commit gate — the lane never lands code. Lane `tools` enforce it: work lanes never get `commit`/`approve`/`bind`; `edit`/`write` ride only implementation lanes; `bind` only a review lane (its row is what `commit` spends). A large feature runs milestone lanes sequentially — each landed commit is the next lane's baseline.
 ```
 
@@ -450,7 +462,7 @@ source ~/.zshrc && pi
 
 In pi and the shell:
 
-1. `/model` → zai/glm-5.4; `Shift+Tab` → max; `Ctrl+S` to save.
+1. `/model` → zai/glm-5.4 (the picker also lists deepseek-v4-pro and deepseek-flash); `Shift+Tab` → max; `Ctrl+S` to save.
 2. `/mcp` → all eight servers connected (or `pi mcp list` from the shell); `pi list` → `npm:@zhtmike/pi-minimal-dispatch` and `git:github.com/zhtmike/pi-kit` installed (dispatch/lanes + the six pi-kit tools load).
 3. "Run `gh auth status`" → authenticated — keyring with `Token scopes: 'repo, …'` (env-token setups show their own scopes). Same for `hf auth whoami`.
 4. "List your skills" → code-review, coding-style, spike, propose, commit-gate, conversation-gate, survey, self-learn.
