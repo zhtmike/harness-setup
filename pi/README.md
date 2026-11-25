@@ -72,7 +72,7 @@ mkdir -p ~/.pi/agent
   "defaultProvider": "zai",
   "defaultModel": "glm-5.4",
   "defaultThinkingLevel": "max",
-  "enabledModels": ["zai/glm-5.4", "zai/glm-5.3-flash", "deepseek/deepseek-v4-pro", "deepseek/deepseek-flash"],
+  "enabledModels": ["zai/glm-5.4", "zai/glm-5.3-flash", "deepseek/deepseek-flash"],
   "showCacheMissNotices": true,
   "retry": { "maxRetries": 10 },
   "packages": ["npm:@zhtmike/pi-minimal-dispatch", "git:github.com/zhtmike/pi-kit"]
@@ -422,7 +422,7 @@ source ~/.zshrc && pi
 
 In pi and the shell:
 
-1. `/model` → zai/glm-5.4 (the picker also lists deepseek-v4-pro and deepseek-flash); `Shift+Tab` → max; `Ctrl+S` to save.
+1. `/model` → zai/glm-5.4 (the picker also lists deepseek-flash); `Shift+Tab` → max; `Ctrl+S` to save.
 2. `/mcp` → all eight servers connected (or `pi mcp list` from the shell); `pi list` → `npm:@zhtmike/pi-minimal-dispatch` and `git:github.com/zhtmike/pi-kit` installed (dispatch/lanes + the six pi-kit tools load).
 3. "Run `gh auth status`" → authenticated — keyring with `Token scopes: 'repo, …'` (env-token setups show their own scopes). Same for `hf auth whoami`.
 4. "List your skills" → code-review, coding-style, spike, propose, commit-gate, conversation-gate, survey, self-learn.

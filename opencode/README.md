@@ -356,8 +356,8 @@ Replace `~/.config/opencode/oh-my-opencode-slim.json`:
   "disabled_agents": ["observer"],
   "presets": {
     "deepseek": {
-      "orchestrator": { "model": "deepseek/deepseek-v4-pro", "variant": "max", "skills": ["*"], "mcps": ["*", "!context7"] },
-      "oracle":       { "model": "deepseek/deepseek-v4-pro", "variant": "max", "skills": ["code-review"], "mcps": ["gh"] },
+      "orchestrator": { "model": "deepseek/deepseek-flash", "variant": "max", "skills": ["*"], "mcps": ["*", "!context7"] },
+      "oracle":       { "model": "deepseek/deepseek-flash", "variant": "max", "skills": ["code-review"], "mcps": ["gh"] },
       "librarian":    { "model": "deepseek/deepseek-flash", "variant": "low", "skills": [], "mcps": ["context7", "gh_grep", "gh", "hf"] },
       "explorer":     { "model": "deepseek/deepseek-flash", "variant": "low", "skills": [], "mcps": ["gh"] },
       "designer":     { "model": "deepseek/deepseek-flash", "variant": "high", "skills": ["coding-style"], "mcps": [] },
